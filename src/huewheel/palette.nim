@@ -5,8 +5,8 @@ let resetMap* = {
   #these are the reset colors for foreground and background colors  
   #these defaults can be replaced by preppending / to the doreground colors and background colors
   "reset":               "0", #reset all styles it could be replaced by this [/]
-  "fgReset":            "39",
-  "bgReset":           "49",
+  "fgReset":            "39", #resets foreground colors
+  "bgReset":           "49", #reset background colors
   }.toTable
 
 let colorMap* = {
@@ -57,7 +57,8 @@ let styleMap* = {
   "reverse": "7",
   "hidden": "8",
   "strike": "9",  #strike-through
-  "resetBold": "21",
+  #"resetBold": "21", 2 is not mostly supported
+  "resetBold": "22",
   "resetDim": "22",
   "resetItalic": "23",
   "resetUnderline": "24",
