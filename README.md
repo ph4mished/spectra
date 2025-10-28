@@ -105,7 +105,6 @@ paint "[fg=cyan][[fg=magenta]OPTIONS[fg=reset][fg=cyan]]
 
 # Output Control
 ## Printing Color To Stdout
-<<<<<<< HEAD
 ``` nim
 paint("[bold fg=cyan]WELCOME![reset]")
 ```
