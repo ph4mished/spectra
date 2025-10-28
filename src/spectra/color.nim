@@ -188,27 +188,3 @@ proc paint*(input: string, toStdOut=true, colorToggle = colorEnabled): string {.
 
 
 
-
-#colorEnabled = true
-#trying to use an alias
-#[let be = "blue"
-paint fmt "[{be} bold] Hi [reset]"
-paint "[bold magenta]Every [ /bold green]color [cyan]is [default]beautiful.[reset]"
-
-paint "[black][bgMagenta]Background [bgGreen]color [bgLightRed]is [bgCyan]changable [bgYellow]too.[bgReset]"
-
-paint "[bold red][[blue]OPTION[/blue red]][reset]"
-
-paint "[#FF0000] Hi [/#FF0000]"
-paint "[bg=#FF0000] Shit [/bg=#FF0000]"
-
-paint "[c=255 bg=236] Hi [reset]"
-paint "[c=255 bg=236] Shit [reset]"
-
-paint "[lightYellow][bold underline]THICC TEXT [/underline /bold] [regular]REGULAR TEXT[reset]"
-let me = paint("[red][ERROR][reset]", false)
-#echo me
-#echo me
-discard me]#
-
-
