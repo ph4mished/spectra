@@ -82,7 +82,7 @@ paint("[c=255 bg=21]└───────────────────
 
 
 
-#[proc showFileManager() =
+proc showFileManager() =
   paint("[bold #4ECDC4]┌─ File Manager ───────────────────────────────────┐[reset]")
   paint("[bold #4ECDC4]│[reset] [c=51]📁 documents/[reset]                            [bold #4ECDC4]│[reset]")
   paint("[bold #4ECDC4]│[reset] [c=51]📁 pictures/[reset]                             [bold #4ECDC4]│[reset]")
@@ -113,7 +113,7 @@ proc showInstallWizard(step: int) =
   paint("[bold #277DA1]└──────────────────────────────────────────────────┘[reset]")
   
   
-showInstallWizard(12)]#
+showInstallWizard(12)
   
   
 proc showDataTable() =
@@ -127,7 +127,7 @@ proc showDataTable() =
   
 showDataTable()
   
-#[proc showDialog(title, message: string) =
+proc showDialog(title, message: string) =
   let width = max(title.len, message.len) + 4
   
   paint("[c=255 bg=236]┌─" & "─".repeat(width) & "─┐[reset]")
@@ -141,7 +141,7 @@ showDataTable()
 showDialog("Open", "Done")]#
   
   
-#[proc showTabs(activeTab: int) =
+proc showTabs(activeTab: int) =
   let tabs = ["Files", "Edit", "View", "Help"]
   
   # Tab headers
@@ -152,18 +152,18 @@ showDialog("Open", "Done")]#
     else:
       tabLine &= "[c=255 bg=240] $1 [reset]" % [tab]
   
-  echo tabLine]#
+  echo tabLine
 
 
 
   
   # Content area
-  #[paint("[c=51]┌──────────────────────────────────────────────────┐[reset]")
+  paint("[c=51]┌──────────────────────────────────────────────────┐[reset]")
   paint("[c=51]│[reset] Content for [bold]$1[reset] tab" % [tabs[activeTab]] & " ".repeat(25) & "[c=51]│[reset]")
   paint("[c=51]└──────────────────────────────────────────────────┘[reset]")]#
 
 
-#showTabs(-5)
+showTabs(-5)
   
   
 # Complex dashboard - STILL READABLE
@@ -184,29 +184,6 @@ paint("[bold #277DA1]│[/bold #277DA1] CPU:  [c=46]42%[/c=46]                  
 paint("[bold #277DA1]│[/bold #277DA1] RAM:  [c=190]68%[/c=190]                       [bold #277DA1]│[/bold /#277DA1]")
 paint("[bold #277DA1]│[/bold #277DA1] Disk: [c=196]85%[/c=196]                       [bold #277DA1]│[/bold /#277DA1]")
 paint("[bold #277DA1]└─────────────────────────────────┘[/bold #277DA1]")
-
-#[
-
-# Unchecked
-paint("[c=244][ ][/c=244] Option 1")
-paint("[c=244][ ][/c=244] Option 2")
-
-# Checked  
-paint("[c=46][✓][/c=46] Option 1")
-paint("[c=46][✓][/c=46] Option 2")
-
-# Focused
-paint("[c=51][ ][/c=51] [bold]Option 1[/bold]")
-
-
-# Unselected
-paint("[c=244]( )[/c=244] Radio 1")
-paint("[c=244]( )[/c=244] Radio 2")
-
-# Selected
-paint("[c=46](●)[/c=46] Radio 1") 
-paint("[c=244]( )[/c=244] Radio 2")
-
 
 
 # Normal button

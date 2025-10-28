@@ -24,7 +24,7 @@ paint("""
 
 
 # Colored cat face
-#[paint("""
+paint("""
 [bold yellow]   /\\_/\\  
   ( o.o ) 
    > ^ <
@@ -82,7 +82,7 @@ paint("""
  | ___ |
   -----
 [/cyan]
-""")]#
+""")
 
 
 
@@ -93,7 +93,7 @@ paint("""
 
 
 
-#[
+
 paint("""
 [bold yellow]    *       *       *
        *       *    
@@ -113,7 +113,7 @@ paint("""
   \\/___\\/___\\/
 [blue]  .     .     .
 [/blue]
-""")]#
+""")
 
 #ctrl+ shift+u + 250c = ┌
 #ctrl+ shift+u + 2514 = └
