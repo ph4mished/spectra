@@ -1,6 +1,6 @@
-# HueWheel
+# Spectra
 
-**HueWheel** is a library for text coloring and formatting.
+**Spectra** is a library for text coloring and formatting.
 
 # Installation
 ``` nim
@@ -8,18 +8,22 @@ nimble install huewheel
 ```
 
 # Features
-1. **Smart Parsing** - HueWheel knows the difference between text and color tags. No accidental parsing of [ERROR] or [INFO] as colors.
-2. It also supports granular reset. Only what you close resets (foreground, background, or text styles).
+1. **Smart Parsing** - Spectra knows the difference between text and color tags. No accidental parsing of [ERROR], [INFO]  or other square bracket bounded words as colors.
+2. It also supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
 3. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
-4. 
+
+# Weakness
+At the moment, spectra lacks windows and mac os support, hence its not cross-platform(only native to linux).
+
 # Usage
-HueWheel supports more than one color tags in its square brackets bounded tags.
+Spectra supports more than one color tags in its square brackets bounded tags.
+
 # Importing the package
 ``` nim
 import huewheel
 ```
 
-#Coloring a text
+# Coloring a text
 ``` nim
 paint "[bold][yellow]Hello Word[reset]"
 
@@ -29,8 +33,9 @@ paint "[bold red]Error:[/bold] File not found[/red]
 paint [#FF0000 underline]DANGER[/#FF0000 /underline]
 
 # 256 color support
-paint
-
+paint "                        [c=255 bg=24]┌────────────────────┐[reset]"
+paint "                        [c=255 bg=24]│     Submit         │[reset]"
+paint "                        [c=255 bg=24]└────────────────────┘[reset]"
 
 ```
 
@@ -51,7 +56,7 @@ paint "[bold][cyan]Usage: [/cyan][green] ./tool [OPTIONS] [reset]"
 # Color Toggling
 ## Global Master Switch
 ``` nim
-
+import terminal
 #colorEnabled is the global switch for huewheel color
 colorEnabled = stdout.isatty()
 
@@ -63,6 +68,7 @@ colorEnabled = true
 paint "[green]Development Mode[reset]"
 
 #color off
+colorEnabled = false
 paint "[green]Sorry, I can't be colored[/green]"
 
 #respect for no color
@@ -77,7 +83,7 @@ paint("[green]Ready[/green]")
 enabledColor = false
 
 #colorToggle is used for per call control or to override enabledColor control
-paint("[bold italic yellow]WARNING[reset]", colorToggle=true)
+paint("[bold italic yellow]WARNING[reset]")
 
 paint("[red]ALWAYS RED[/red]", colorToggle=true)
 
@@ -102,7 +108,7 @@ paint """[bold magenta]HueWheel[/bold]
 #This example is to express how huewheel can be used for ascii arts
 
 # Create gradient-like effects with multiple colors
-#to recreate the unicde block below
+#to recreate the uniocde block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
 paint("""
 [#FF0000]▓▓▓[/#FF0000][#FF3300]▓▓▓[/#FF3300][#FF6600]▓▓▓[/#FF6600][#FF9900]▓▓▓[/#FF9900][#FFCC00]▓▓▓[/#FFCC00]
@@ -138,6 +144,6 @@ paint "[c=255 bg=24]└───────────────────
 ```
 
 ## Results
-![Hi](/img/beauty.png)
+![beauty](/example_result/beauty.png)
 
 
