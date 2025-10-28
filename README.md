@@ -76,7 +76,7 @@ paint "[fg=green]Development Mode[reset]"
 #color off
 colorEnabled = false
 colorToggle = false
-paint "[fggreen]Sorry, I can't be colored[reset]"
+paint "[fg=green]Sorry, I can't be colored[reset]"
 
 #respect for no color
 colorToggle= not paramStr(1) == "--no-color"
