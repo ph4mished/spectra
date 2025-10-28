@@ -7,6 +7,6 @@
 
 import unittest
 
-import huewheel
-test "can add":
-  check add(5, 5) == 10
+import spectra
+test "paint proc":
+  check paint("[red]Hello[reset]", toStdOut=false, colorToggle=false) == "Hello"

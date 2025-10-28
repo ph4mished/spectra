@@ -3,49 +3,51 @@ import palette
 
 
 
-proc isValidHex(hex: string): bool =
-  #hex codes are stripped of their prefix '#' and 'bg=#' before this proc is called
-  if hex.len notin [6,8]: #for rrggbb and rrggbbaa
-    return false
-  for ch in hex:
-    if ch notin {'0'..'9', 'a'..'f', 'A'..'F'}:
+proc isValidHex(hexCode: string): bool =
+  try:
+    if hexCode[4..^1].len notin [6,8]: #for rrggbb and rrggbbaa
       return false
-  return true
+    for ch in hexCode[4..^1]:
+      if ch notin {'0'..'9', 'a'..'f', 'A'..'F'}:
+        return false
+    return true
+  except RangeDefect:
+    return false
 
 
 proc isValid256Code(paletteCode: string): bool =
-  #codes are stripped of their prefix 'c=' and 'bg=' before this proc is called
-  return parseInt(paletteCode) >= 0 and parseInt(paletteCode) <= 255
+  try:
+    return parseInt(paletteCode[3..^1]) >= 0 and parseInt(paletteCode[3..^1]) <= 255
+  except ValueError:
+    return false
+    
+  
     
   
 
 proc supportsTrueColor(): bool = 
   return getEnv("COLORTERM") == "truecolor"
+
  
 #this function was made to validate words in []
 proc isSupportedColor(input: string): bool = 
-  if input.startsWith("/"):
-    return input[1..^1] in colorMap or input[1..^1] in styleMap or input[1..^1] in resetMap or input[1..^1].startsWith("#") and isValidHex(input[2..^1]) or input[1..^1].startsWith("bg=") and isValidHex(input[5..^1]) or input[1..^1].startsWith("bg=") and isValid256Code(input[4..^1]) or input[1..^1].startsWith("c=") and isValid256Code(input[3..^1])
-  #this function is to tell if input enclosed in [] is part of the color or style table.
-  #this is to tell apart non-tags that are also in square brackets. eg [ERROR] such are sent back as text for coloring.
-  return input in colorMap or input in styleMap or input in resetMap or input.startsWith("#") and isValidHex(input[1..^1]) or input.startsWith("bg=") and isValidHex(input[4..^1]) or input.startsWith("bg=") and isValid256Code(input[3..^1]) or input.startsWith("c=") and isValid256Code(input[2..^1])
+  return input in paletteMap or input.isValidHex()  or input.isValid256Code() 
+
 
 proc parseHexToAnsiCode(hex: string): string =
-  #passing a hex like "#FF0000" means its for foreground.
-  #passing "bg=#FF0000" means its for backgroud
-  if hex.len in [7, 10]:
+
+  if hex.len == 10:
     #for #rrggbb
     if supportsTrueColor():
+      let r = parseHexInt(hex[4..5])  #this is meant to extract RR
+      let g = parseHexInt(hex[6..7])  # this is meant to extract GG
+      let b = parseHexInt(hex[8..9])  #to extract BB
       if hex.startsWith("bg="):
-        let r = parseHexInt(hex[4..5])  #this is meant to extract RR
-        let g = parseHexInt(hex[6..7])  # this is meant to extract GG
-        let b = parseHexInt(hex[8..9])  #to extract BB
         return fmt "\e[48;2;{r};{g};{b}m"
-      else:
-        let r = parseHexInt(hex[1..2])  #this is meant to extract RR
-        let g = parseHexInt(hex[3..4])  # this is meant to extract GG
-        let b = parseHexInt(hex[5..6])  #to extract BB
+      elif hex.startsWith("fg="):
         return fmt "\e[38;2;{r};{g};{b}m"
+
+#Note:
       #foreground colors use 38 and background colors use 48. the 2 is for truecolor support
   #so its \e[38;2;R;G;Bm or for background \e[48;2;R;G;Bm 
   #so the second row of number tells what color mode it is (2: rgb(24 bits), 245)
@@ -55,74 +57,33 @@ proc parseHexToAnsiCode(hex: string): string =
   # 256 palette support synax will be [c=214] = foreground color and [bg=214] = background color
   # where c = color and bg = background color
 
-proc parse256ColorCode(paletteCode: string): string =
+proc parse256ColorCode(colorCode: string): string =
   if supportsTrueColor():
-    if paletteCode.startsWith("c="):
-      return fmt "\e[38;5;{paletteCode[2..^1]}m"
-    elif paletteCode.startsWith("bg="):
-      return fmt "\e[48;5;{paletteCode[4..^1]}m"
+      return fmt "\e[48;5;{colorCode[4..^1]}m"
 
 
 
 proc parseColor(color: string): string {.discardable.} = 
   #this function is meant to receive string like "bold" "red" and other colors and
   #convert them to their ansi codes
-  #for strings with /
-  if color.startsWith('/'):
-    #all values with /bg are handled here /bg=#FF0000 or /bgRed or /bg=45
-    if color[1..2] == "bg":
-      let bgRstMap = resetMap["bgReset"]
-      return fmt "\e[{bgRstMap}m"
+    if color in paletteMap:
+      return color.replace(color, fmt "\e[{paletteMap[color]}m")
 
-    elif color[1..^1] in colorMap:
-      let fgRstMap = resetMap["fgReset"]
-      return fmt "\e[{fgRstMap}m"
-
-    elif color.startsWith("/#") and isValidHex(color[2..^1]) or color.startsWith("/c=") and isValid256Code(color[3..^1]):
-      let fgRstMap = resetMap["fgReset"]
-      return fmt "\e[{fgRstMap}m"
-
-      #for styles
-    elif color[1..^1] in styleMap:
-      let styMp = styleMap[fmt "reset{color[1..^1].capitalizeAscii()}"]
-      return fmt "\e[{styMp}m"
-
-  #check for valid foreground hex values before parsing
-  if color.startsWith("#") and isValidHex(color[1..^1]):
-    return parseHexToAnsiCode(color)
-  #check for valid background values before parsing
-  elif color.startsWith("bg="):
-    if color[3] == '#' and isValidHex(color[4..^1]):
-      return parseHexToAnsiCode(color) 
-    elif isValid256Code(color[3..^1]):
+    elif color.isValid256Code():
       return parse256ColorCode(color)
 
-
-  #check for valid 256 foreground color palette values before parsing
-  #echo "Stripped color: " & color[2..^1]
-  if color.startsWith("c=") and isValid256Code(color[2..^1]):
-    return parse256ColorCode(color)
-  #check for valid background color palette values before parsing
-  #elif color.startsWith("bg=") and isValid256Code(color[4..^1]):
-   # return parse256ColorCode(color)
-
-   
-  if color in colorMap:
-    return color.replace(color, fmt "\e[{colorMap[color]}m")
-  elif color in styleMap:
-    return color.replace(color, fmt "\e[{styleMap[color]}m")
-  else:
-    color.replace(color, fmt "\e[{resetMap[color]}m")
-
+    elif color.isValidHex():
+      return parseHexToAnsiCode(color)
+    
 
 
 
 # Global flag for toggling color
 #this one will be called when user want color toggling control globally
-var colorEnabled*: bool = true
+var colorToggle*: bool = true
 
 
-proc paint*(input: string, toStdOut=true, colorToggle = colorEnabled): string {.discardable.} =
+proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.discardable.} =
   var 
     color = ""
     inReadSequence = false
@@ -159,7 +120,7 @@ proc paint*(input: string, toStdOut=true, colorToggle = colorEnabled): string {.
 
       if allColors:
         for w in allWords:
-          if colorToggle:
+          if forceColor:
             output.add(parseColor(w))
           else:
             output.add("")
@@ -181,10 +142,38 @@ proc paint*(input: string, toStdOut=true, colorToggle = colorEnabled): string {.
     else:
       output.add(ch)
      
-  if toStdOut == true:
+  if toStdout == true:
     echo output
   else:
     return output
 
 
 
+<<<<<<< HEAD
+=======
+
+#[
+paint "[bold fg=254] OH no[256][reset]"
+#colorEnabled = true
+#trying to use an alias
+#let be = "fg=blue"
+paint fmt "[fg=blue bold] Hi [reset]"
+paint "[bold fg=magenta]Every [ bold=reset fg=green]color [fg=cyan]is [default]beautiful.[reset]"
+
+paint "[fg=black][bg=magenta]Background [bg=green]color [bg=lightred]is [bg=cyan]changable [bg=yellow]too.[reset]"
+
+paint "[bold bg=red][[blue]OPTION[fg=reset fg=red]][reset]"
+
+paint "[italic fg=#FF0000] Hi [fg=reset bold] Okay[reset]"
+paint "[bg=#FF0000] Good [bg=reset]"
+
+paint "[fg=255 bg=236] Hi [reset]"
+paint "[fg=255 bg=236] Great [reset]"
+
+paint "[fg=lightyellow][bold underline]THICC TEXT [/underline /bold] [regular]REGULAR TEXT[reset]"
+let me = paint("[fg=red][ERROR][reset]", false)
+#echo me
+#echo me
+discard me]#
+
+>>>>>>> fadb77f (Revised color and style syntax)
