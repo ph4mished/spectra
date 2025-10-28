@@ -95,6 +95,18 @@ paint("[blue]COLOR DEPENDS[/blue]", colorToggle=stdout.isatty())
 paint "[cyan][[magenta]OPTIONS[/magenta][cyan]]
 ```
 
+# Output Control
+## Printing Color To Stdout
+``` nim
+paint("[bold cyan]WELCOME![reset]")
+```
+
+## Return Results (Does not print)
+``` nim
+let name = paint("[bold green]GOOD BYE![reset]", toStdout=false)
+echo name
+```
+
 # HueWheel In Action
 ``` nim
 paint """[bold magenta]HueWheel[/bold]
