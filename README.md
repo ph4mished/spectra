@@ -74,7 +74,6 @@ colorToggle = true
 paint "[fg=green]Development Mode[reset]"
 
 #color off
-colorEnabled = false
 colorToggle = false
 paint "[fg=green]Sorry, I can't be colored[reset]"
 
@@ -114,18 +113,6 @@ paint("[bold fg=cyan]WELCOME![reset]")
 let name = paint("[bold fg=green]GOOD BYE![reset]", toStdout=false)
 echo name
 ```
-
-# HueWheel In Action
-``` nim
-paint("[bold fg=cyan]WELCOME![reset]")
-```
-
-## Return Results (Does not print)
-``` nim
-let name = paint("[bold fg=green]GOOD BYE![reset]", toStdout=false)
-echo name
-```
-
 
 # Spectra In Action
 ``` nim
