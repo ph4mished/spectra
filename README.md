@@ -57,8 +57,8 @@ paint "[bold][fg=cyan]Usage: [fg=reset][fg=green] ./tool [OPTIONS] [reset]"
 ## Global Master Switch
 ``` nim
 import terminal
-#colorEnabled is the global switch for huewheel color
-colorEnabled = stdout.isatty()
+#colorToggle is the global switch for huewheel color
+colorToggle = stdout.isatty()
 
 paint "[fg=red]ERROR[reset]"
 import terminal  #imported for stdout.isatty()
