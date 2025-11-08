@@ -1,12 +1,12 @@
 # Package
 
-version       = "0.1.1"
+version       = "0.1.2"
 author        = "Jonathan Botchway Owusu"
-description   = "Huewheel is a simple text coloring, styling and formatting library"
+description   = "Spectra is a simple text coloring, styling and formatting library"
 license       = "MIT"
 srcDir        = "src"
 installExt    = @["nim"]
-bin           = @["huewheel"]
+bin           = @["spectra"]
 
 
 # Dependencies
