@@ -8,9 +8,8 @@ nimble install spectra
 ```
 
 # Features
-1. **Smart Parsing** - Spectra knows the difference between text and color tags. No accidental parsing of [ERROR], [INFO]  or other square bracket bounded words as colors.
-2. It also supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
-3. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
+1. It also supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
+2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
 
 # Weakness
 At the moment, spectra lacks windows and mac os support, hence its not cross-platform(only native to linux).
