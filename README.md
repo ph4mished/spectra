@@ -55,11 +55,6 @@ paint "[bold][fg=cyan]Usage: [fg=reset][fg=green] ./tool [OPTIONS] [reset]"
 # Color Toggling
 ## Global Master Switch
 ``` nim
-import terminal
-#colorToggle is the global switch for huewheel color
-colorToggle = stdout.isatty()
-
-paint "[fg=red]ERROR[reset]"
 import terminal  #imported for stdout.isatty()
 #colorToggle is the global switch for spectra color
 colorToggle = stdout.isatty()
@@ -87,7 +82,7 @@ paint("[fg=green]Ready[reset]")
 #colorToggle will be called for global setting
 colorToggle = false
 
-#colorToggle is used for per call control or to override enabledColor control
+
 #forceColor is used for per paint() call color control or to override colorToggle control
 paint("[bold italic strike fg=yellow]WARNING[reset]")
 
@@ -112,7 +107,7 @@ echo name &  "World!"
 ``` nim
 paint """[bold fg=magenta]Spectra[bold=reset]
          brings [fg=cyan]colors[fg=reset] to life!
-         [fg=red][#FF6600]also[fg=yellow]in[fg=green]a[fg=blue]human[fg=#6600FF]friendly[fg=magenta]way[reset]
+         [fg=red]also[fg=yellow]in[fg=green]a[fg=blue]human[fg=#6600FF]friendly[fg=magenta]way[reset]
          """
 ```
 
@@ -121,7 +116,7 @@ paint """[bold fg=magenta]Spectra[bold=reset]
 #This example is to express how spectra can be used for ascii arts
 
 # Create gradient-like effects with multiple colors
-#to recreate the uniocde block below
+#to recreate the unicode block below
 #to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
 paint("""
