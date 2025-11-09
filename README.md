@@ -8,7 +8,7 @@ nimble install spectra
 ```
 
 # Features
-1. It also supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
+1. It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
 2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
 
 # Weakness
