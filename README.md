@@ -96,11 +96,6 @@ paint("[fg=red]ALWAYS RED[reset]", forceColor=true)
 paint("[fg=blue]COLOR DEPENDS[reset]", forceColor=stdout.isatty())
 ```
 
-# Smart Bracket Handling
-``` nim
-paint "[fg=cyan][[fg=magenta]OPTIONS[fg=reset][fg=cyan]]
-```
-
 # Output Control
 ## Printing Color To Stdout
 ``` nim
