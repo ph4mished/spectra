@@ -1,6 +1,6 @@
 # Spectra
 
-**Spectra** is a library for text coloring and formatting.
+**Spectra** is a library for terminal text coloring and formatting.
 
 # Installation
 ``` nim
@@ -12,6 +12,8 @@ nimble install spectra
 2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
 
 **Spectra has true color support** which is dependant on whether your terminal supports it or not. This is achieved through its hex colors.
+
+When true-color is not available, **hex colors will not be rendered**
 
 # Weakness
 At the moment, spectra lacks windows and mac os support, hence its not cross-platform(only native to linux).
