@@ -10,7 +10,7 @@ nimble install spectra
 # Features
 1. It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
 2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
-3. Spectra uses []-based syntax but its not an owned syntax. **Users are free to use "[ ]" for anything of their choice without needing escapes, only if its content does not count as spectra tag/color.**
+3. Spectra uses [ ]-enclosed syntax but its not an owned syntax. **Users are free to use "[ ]" for anything of their choice without needing escapes, only if its content does not count as spectra tag/color.**
  
 **Spectra has true color support** which is dependant on whether your terminal supports it or not. This is achieved through its hex colors.
 
