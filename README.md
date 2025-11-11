@@ -45,7 +45,7 @@ paint "[bold][fg=yellow]Hello Word[reset]"
 paint "[bold fg=red]Error:[bold=reset] File not found[reset]
 
 #hex color
-paint [fg=#FF0000 underline]DANGER[fg=reset underline=reset]
+paint "[fg=#FF0000 underline]DANGER[fg=reset underline=reset]"
 
 # 256 color support
 paint "                        [fg=255 bg=24]┌────────────────────┐[reset]"
