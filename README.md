@@ -11,6 +11,8 @@ nimble install spectra
 1. It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
 2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
 
+**Spectra has true color support** which is dependant on whether your terminal supports it or not. This is achieved through its hex colors.
+
 # Weakness
 At the moment, spectra lacks windows and mac os support, hence its not cross-platform(only native to linux).
 
