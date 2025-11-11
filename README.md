@@ -10,7 +10,8 @@ nimble install spectra
 # Features
 1. It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
 2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
-
+3. Spectra uses []-based syntax but its not an owned syntax. **Users are free to use "[]" for anything of their choice only if its content does not count as spectra tag/color.**
+ 
 **Spectra has true color support** which is dependant on whether your terminal supports it or not. This is achieved through its hex colors.
 
 When true-color is not available, **hex colors will not be rendered**
@@ -19,7 +20,18 @@ When true-color is not available, **hex colors will not be rendered**
 At the moment, spectra lacks windows and mac os support, hence its not cross-platform(only native to linux).
 
 # Usage
-**Spectra supports more than one color tags in its square brackets bounded tags.**
+**Spectra supports more than one color tags in its square brackets bounded syntax (but one bad nut spoils all).** It means spectra supports 
+``` nim
+paint("[bold italic strike fg=cyan]Hello World[reset]")
+#This will work perfectly 
+```
+**but a typo goes unforgiven**
+```nim
+paint("[bld italic strike fg=cyan]Hello World[reset]")
+
+#"bld" is the bad nut, so all other tags enclosed in same [] are treated as literals.
+#hence it prints uncolored "[bld italic strike fg=cyan]Hello World"
+```
 
 # Importing the package
 ``` nim
