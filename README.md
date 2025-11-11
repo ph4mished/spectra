@@ -38,6 +38,29 @@ paint("[bld italic strike fg=cyan]Hello World[reset]")
 import spectra
 ```
 
+## Usage Examples
+```nim
+import spectra
+
+#Multiple styles in one tag
+paint("[bold italic fg=red]Important![reset]")
+
+#Granular reset control
+paint("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=reset] Normal")
+
+#Hex colors
+paint("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]")
+
+#256 colors
+paint("[fg=202]Orange text[fg=45]Blue text[reset]")
+
+
+#Style example
+paint "[bold bg=yellow fg=cyan hidden]Sorry can't find me[hidden=reset]Oops! I've being caught[reset]"
+```
+
+
+
 # Coloring a text
 ``` nim
 paint "[bold][fg=yellow]Hello Word[reset]"
@@ -62,7 +85,7 @@ paint "[bold fg=black bg=#F9C74F]WARNING [bold=reset bg=reset] Memory usage high
 
 # Cli Tools
 ``` nim
-paint "[bold fgcyan]Usage:[fg=reset fg=green] ./tool [OPTIONS] [reset]"
+paint "[bold fg=cyan]Usage:[fg=reset fg=green] ./tool [OPTIONS] [reset]"
 
 #or
 paint "[bold][fg=cyan]Usage: [fg=reset][fg=green] ./tool [OPTIONS] [reset]"
@@ -151,8 +174,6 @@ paint("""
 """)
 
 paint("""
-[fg=red]R[fg=#FF6600]A[fg=yellow]I[fg=green]N[fg=blue]B[fg=#6600FF]O[fg=magenta]W[reset]
-
 [fg=red]▄▄▄▄▄[fg=#FF6600]▄▄▄▄▄[fg=yellow]▄▄▄▄▄[fg=green]▄▄▄▄▄[fg=blue]▄▄▄▄▄[fg=#6600FF]▄▄▄▄▄[fg=magenta]▄▄▄▄▄[reset]
 """)
 
@@ -171,4 +192,88 @@ paint "[fg=255 bg=24]└──────────────────�
 ## Results
 ![beauty](/example_result/beauty.png)
 
+
+
+# Spectra Syntax Reference
+
+## Basic Colors
+**Foreground Colors**
+| Command | Effect |
+|---------|--------|
+| `fg=black` | Black text |
+| `fg=red` | Red text |
+| `fg=green` | Green text |
+| `fg=yellow` | Yellow text |
+| `fg=blue` | Blue text |
+| `fg=magenta` | Magenta text |
+| `fg=cyan` | Cyan text |
+| `fg=white` | White text |
+| `fg=darkgray` | Dark gray text |
+| `fg=lightred` | Light red text |
+| `fg=lightgreen` | Light green text |
+| `fg=lightyellow` | Light yellow text |
+| `fg=lightblue` | Light blue text |
+| `fg=lightmagenta` | Light magenta text |
+| `fg=lightcyan` | Light cyan text |
+| `fg=lightwhite` | Light white text |
+
+
+**Background Colors**
+| Command | Effect |
+|---------|--------|
+| `bg=black` | Black background |
+| `bg=red` | Red background |
+| `bg=green` | Green background |
+| `bg=yellow` | Yellow background |
+| `bg=blue` | Blue background |
+| `bg=magenta` | Magenta background |
+| `bg=cyan` | Cyan background |
+| `bg=white` | White background |
+| `bg=darkgray` | Dark gray background |
+| `bg=lightred` | Light red background |
+| `bg=lightgreen` | Light green background |
+| `bg=lightyellow` | Light yellow background |
+| `bg=lightblue` | Light blue background |
+| `bg=lightmagenta` | Light magenta background |
+| `bg=lightcyan` | Light cyan background |
+| `bg=lightwhite` | Light white background |
+
+
+## Text Styles
+| Command | Effect |
+|---------|--------|
+| `bold` | Bold/bright text |
+| `dim` | Dim/faint text |
+| `italic` | Italic text |
+| `underline` | Underlined text |
+| `blink` | Slow blinking text |
+| `blinkfast` | Fast blinking text |
+| `reverse` | Reverse video (swap foreground and background colors) |
+| `hidden` | Hidden text |
+| `strike` | Strikethrough text |
+
+## Reset Commands
+| Command | Effect |
+|---------|--------|
+| `reset` | Reset all colors and styles |
+| `fg=reset` | Reset foreground color only |
+| `bg=reset` | Reset background color only |
+| `bold=reset` | Reset bold style only |
+| `dim=reset` | Reset dim style only |
+| `italic=reset` | Reset italic style only |
+| `underline=reset` | Reset underline style only |
+| `blink=reset` | Reset blink style only |
+| `blinkfast=reset` | Reset fast blink style only |
+| `reverse=reset` | Reset reverse style only |
+| `hidden=reset` | Reset hidden style only |
+| `strike=reset` | Reset strikethrough style only |
+
+
+## Advanced Features
+| Command | Effect |
+|---------|--------|
+| `fg=#RRGGBB` | Hex color for foreground |
+| `bg=#RRGGBB` | Hex color for background |
+| `fg=NNN` | 256-color palette (0-255) for foreground |
+| `bg=NNN` | 256-color palette (0-255) for background |
 
