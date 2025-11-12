@@ -139,7 +139,7 @@ paint("[bold fg=cyan]WELCOME![reset]")
 ## Return Results (Does not print)
 ``` nim
 let greet = paint("[bold fg=green]GOOD DAY![reset]", toStdout=false)
-echo name &  "World!"
+echo greet &  "World!"
 ```
 
 # Spectra In Action
