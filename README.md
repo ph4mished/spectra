@@ -159,10 +159,11 @@ paint """[bold fg=magenta]Spectra[bold=reset]
 #to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
 paint("""
-[fg=#FF0000]███[fg=#FF3300]███[fg=#FF6600]███[fg=#FF9900]███[fg=#FFCC00]███[reset]
-[fg=#CC0000]███[fg=#CC3300]███[fg=#CC6600]███[fg=#CC9900]███[fg=#CCCC00]███[reset]
-[fg=#990000]███[fg=#993300]███[fg=#996600]███[fg=#999900]███[fg=#99CC00]███[reset]
+[fg=#FF0000]▓▓▓[fg=#FF3300]▓▓▓[fg=#FF6600]▓▓▓[fg=#FF9900]▓▓▓[fg=#FFCC00]▓▓▓[reset]
+[fg=#CC0000]▓▓▓[fg=#CC3300]▓▓▓[fg=#CC6600]▓▓▓[fg=#CC9900]▓▓▓[fg=#CCCC00]▓▓▓[reset]
+[fg=#990000]▓▓▓[fg=#993300]▓▓▓[fg=#996600]▓▓▓[fg=#999900]▓▓▓[fg=#99CC00]▓▓▓[reset]
 """)
+
 
 # Simple colored blocks and patterns
 #to recreate the unicode block below
