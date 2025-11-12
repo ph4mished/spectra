@@ -18,7 +18,7 @@ proc isValidHex(hexCode: string): bool =
 proc isValid256Code(paletteCode: string): bool =
   try:
     return parseInt(paletteCode[3..^1]) >= 0 and parseInt(paletteCode[3..^1]) <= 255
-  except ValueError:
+  except Exception:
     return false
     
   
@@ -114,9 +114,16 @@ proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.di
         #check if all words are colors
       var allColors = allWords.len > 0
       for w in allWords:
-        if not isSupportedColor(w):
-          allColors = false
-          break
+        try:
+          if not isSupportedColor(w):
+            allColors = false
+        except Exception as e:
+          echo e.name, ": ", e.msg
+          for trace in e.trace:
+            echo "Filename: ", trace.filename
+            echo "Procname: ", trace.procname
+            echo "Line: ", trace.line, "\n"
+          quit(1)
 
       if allColors:
         for w in allWords:
