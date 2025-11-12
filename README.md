@@ -65,14 +65,14 @@ paint "[bold bg=yellow fg=cyan hidden]Sorry can't find me[hidden=reset]Oops! I'v
 ``` nim
 paint "[bold][fg=yellow]Hello Word[reset]"
 
-paint "[bold fg=red]Error:[bold=reset] File not found[reset]
+paint "[bold fg=red]Error:[bold=reset] File not found[reset]"
 
 #hex color
 paint "[fg=#FF0000 underline]DANGER[fg=reset underline=reset]"
 
 # 256 color support
 paint "                        [fg=255 bg=24]┌────────────────────┐[reset]"
-paint "                        [fg=255 bg=24]│     Submit         │[reset]"
+paint "                        [fg=255 bg=24]│       Submit       │[reset]"
 paint "                        [fg=255 bg=24]└────────────────────┘[reset]"
 
 ```
@@ -80,7 +80,7 @@ paint "                        [fg=255 bg=24]└──────────�
 # System Messages
 ``` nim
 paint "[bold fg=white bg=#FF6B6B]CRITICAL[reset] CPU at 95%"
-paint "[bold fg=black bg=#F9C74F]WARNING [bold=reset bg=reset] Memory usage high[reset]"
+paint "[bold fg=black bg=#F9C74F]WARNING[bold=reset bg=reset] Memory usage high[reset]"
 ```
 
 # Cli Tools
@@ -159,9 +159,9 @@ paint """[bold fg=magenta]Spectra[bold=reset]
 #to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
 paint("""
-[fg=#FF0000]▓▓▓[fg=#FF3300]▓▓▓[fg=#FF6600]▓▓▓[fg=#FF9900]▓▓▓[f#FFCC00]▓▓▓[reset]
-[fg=#CC0000]▓▓▓[fg=#CC3300]▓▓▓[fg=#CC6600]▓▓▓[fg=#CC9900]▓▓▓[fg=#CCCC00]▓▓▓[reset]
-[fg=#990000]▓▓▓[fg=#993300]▓▓▓[fg=#996600]▓▓▓[fg=#999900]▓▓▓[fg=#99CC00]▓▓▓[reset]
+[fg=#FF0000]███[fg=#FF3300]███[fg=#FF6600]███[fg=#FF9900]███[fg=#FFCC00]███[reset]
+[fg=#CC0000]███[fg=#CC3300]███[fg=#CC6600]███[fg=#CC9900]███[fg=#CCCC00]███[reset]
+[fg=#990000]███[fg=#993300]███[fg=#996600]███[fg=#999900]███[fg=#99CC00]███[reset]
 """)
 
 # Simple colored blocks and patterns
