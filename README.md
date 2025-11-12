@@ -72,7 +72,7 @@ paint "[fg=#FF0000 underline]DANGER[fg=reset underline=reset]"
 
 # 256 color support
 paint "                        [fg=255 bg=24]┌────────────────────┐[reset]"
-paint "                        [fg=255 bg=24]│       Submit       │[reset]"
+paint "                        [fg=255 bg=24]│     Submit         │[reset]"
 paint "                        [fg=255 bg=24]└────────────────────┘[reset]"
 
 ```
