@@ -22,15 +22,15 @@ At the moment, spectra lacks windows and mac os support, hence its not cross-pla
 # Usage
 **Spectra supports more than one color tags in its square brackets bounded syntax (but one bad nut spoils all).** It means spectra supports 
 ``` nim
-paint("[bold italic strike fg=cyan]Hello World[reset]")
+paint("[fg=white][bold italic strike fg=cyan]Hello World[reset]")
 #This will work perfectly 
 ```
 **but a typo goes unforgiven**
 ```nim
-paint("[bld italic strike fg=cyan]Hello World[reset]")
+paint("[fg=white][bld italic strike fg=cyan]Hello World[reset]")
 
 #"bld" is the bad nut, so all other tags enclosed in same [] are treated as literals.
-#hence it prints uncolored "[bld italic strike fg=cyan]Hello World"
+#hence it prints "[bld italic strike fg=cyan]Hello World" colored white due to the first color (fg=white). 
 ```
 
 # Importing the package
