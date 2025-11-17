@@ -17,7 +17,8 @@ nimble install spectra
 When true-color is not available, **hex colors will not be rendered**
 
 # Limitation
-At the moment, spectra lacks support for windows, hence its not cross-platform(only native to linux and possibly macos).
+Spectra supports Unix-like systems including Linux and macOS. Windows is not supported due to different terminal architecture.
+
 
 # Usage
 **Spectra supports more than one color tags in its square brackets bounded syntax (but one bad nut spoils all).** It means spectra supports 
