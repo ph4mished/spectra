@@ -59,8 +59,10 @@ proc parseHexToAnsiCode(hex: string): string =
 
 proc parse256ColorCode(colorCode: string): string =
   if supportsTrueColor():
-      return fmt "\e[48;5;{colorCode[4..^1]}m"
-
+    if colorCode.startsWith("bg="):
+      return fmt "\e[48;5;{colorCode[3..^1]}m"
+    elif colorCode.startsWith("fg="):
+      return fmt "\e[38;5;{colorCode[3..^1]}m"
 
 
 proc parseColor(color: string): string {.discardable.} = 
