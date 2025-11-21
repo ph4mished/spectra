@@ -116,14 +116,14 @@ proc apply*(temp: CompiledTemplate, args: varargs[string]): string =
 
 
 
-#[proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.discardable.} =
+proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.discardable.} =
   if toStdout:
-    echo compile(input)
+    echo apply(compile(input))
   else:
-    return (input)]#
+    return apply(compile(input))
   
 
-when isMainModule:
+#[when isMainModule:
   import times
   let startTime = cpuTime()
   let filename = "example.txt"
@@ -144,4 +144,4 @@ when isMainModule:
 
 
   echo "First Loop Duration [With Compiled Spectra]: ", nEndTime-nStartTime, "sec"
-  echo "Last Loop Duration [Without Spectra]: ", nEndTime-nStartTime, "sec"
+  echo "Last Loop Duration [Without Spectra]: ", nEndTime-nStartTime, "sec"]#
