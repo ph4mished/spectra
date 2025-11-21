@@ -324,11 +324,10 @@ echo "Fourth Loop Duration [Without Spectra]: ", nEndTime-nStartTime, "sec"
 
 ## Output
 ``` bash
-First Loop Duration [All In One]: 177.06442157299998 sec
-
-
-Second Loop Duration [One Tag Per '[]']: 198.080801038 sec
-Third Loop Duration [Without Spectra]: 5.26215609999997sec
+First Loop Duration [All In One]: 157.657935402 sec
+Second Loop Duration [One Tag Per '[]']: 177.703688509 sec
+Third Loop Duration [Precomputed Spectra]: 4.864570024999978 sec
+Fourth Loop Duration [Without Spectra]: 1.2990780179999888sec
 
 ```
 
