@@ -1,6 +1,6 @@
 # Spectra
 
-**Spectra** is a library for terminal text coloring and formatting.
+**Spectra** is a high performance library for terminal text coloring and formatting.
 
 # Installation
 ``` nim
@@ -60,7 +60,7 @@ paint("[fg=202]Orange text[fg=45]Blue text[reset]")
 paint "[bold bg=yellow fg=cyan hidden]Sorry can't find me[hidden=reset]Oops! I've being caught[reset]"
 ```
 
-# Precompilation or Precomputation:
+# Precompilation or Precomputation [For Performance]:
 Spectra isn't all that slow, instead of re-parsing per loop you can precompile your tags (so easy).
 Worried about manual interpolation??, just use indices(index) (square bracket bounded index). See the example below.
 ``` nim
