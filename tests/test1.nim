@@ -7,6 +7,7 @@
 
 import unittest
 
-import spectra
+#use "include" so as to be able to even access private procs
+include spectra
 test "paint proc":
   check paint("[red]Hello[reset]", toStdOut=false, colorToggle=false) == "Hello"

@@ -8,9 +8,9 @@ nimble install spectra
 ```
 
 # Features
-1. It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
-2. Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
-3. Spectra uses [ ]-enclosed syntax but its not an owned syntax. **Users are free to use "[ ]" for anything of their choice without needing escapes, only if its content does not count as spectra tag/color.**
+- It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
+- Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
+- Spectra uses [ ]-enclosed syntax but its not an owned syntax. **Users are free to use "[ ]" for anything of their choice without needing escapes, only if its content does not count as spectra tag/color.**
  
 **Spectra has true color support**, depending on your terminal's true color support. This is achieved through its hex colors.
 
@@ -278,4 +278,77 @@ paint "[fg=255 bg=24]└──────────────────�
 | `bg=#RRGGBB` | Hex color for background |
 | `fg=NNN` | 256-color palette (0-255) for foreground |
 | `bg=NNN` | 256-color palette (0-255) for background |
+
+
+# Parsing Overhead Benchmark
+I decided to test the speed of spectra parsing.
+``` nim
+import spectra, strformat, times
+
+#check for all in one parsing
+let fStartTime = cpuTime()
+for i in 0..1000000:
+  discard paint(fmt"[bold fg=cyan italic] Processing [fg=yellow underline]{i}[fg=green strike]from [dim blink fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]", toStdout=false)
+let fEndTime = cpuTime()
+
+
+#checking for one [] per tag parsing
+let sStartTime = cpuTime()
+for i in 0..1000000:
+  discard paint(fmt"[bold][fg=cyan][italic] Processing [fg=yellow][underline]{i}[fg=green][strike] from [dim][blink][fg=#FFFFFF] file 1 [reverse][fg=254] to end[reset]", toStdout=false)
+let sEndTime = cpuTime()
+
+
+#checking for precompiled spectra
+let comp = compile("[bold fg=cyan italic] Processing [0] [fg=yellow underline fg=green strike]from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+
+let tStartTime = cpuTime()
+for i in 0..1000000:
+  discard comp.apply($i)
+let tEndTime = cpuTime()
+
+
+#Checking without spectra
+let nStartTime = cpuTime()
+for i in 0..1000000:
+  discard fmt "Processing {i} from file 1  to end."
+let nEndTime = cpuTime()
+
+
+echo "First Loop Duration [All In One]: ", fEndTime-fStartTime, " sec"
+echo "Second Loop Duration [One Tag Per '[]']: ", sEndTime-sStartTime, " sec"
+echo "Third Loop Duration [Precomputed Spectra]: ", tEndTime-tStartTime, "sec"
+echo "Fourth Loop Duration [Without Spectra]: ", nEndTime-nStartTime, "sec"
+
+```
+
+## Output
+``` bash
+First Loop Duration [All In One]: 177.06442157299998 sec
+Second Loop Duration [One Tag Per '[]']: 198.080801038 sec
+Third Loop Duration [Without Spectra]: 5.26215609999997sec
+
+```
+
+**This parsing overhead benchmark is a call for concern. The next update of spectra will include precompilation (although not implicit to paint())**
+
+ This is how it will look 
+ ``` nim
+#spectra parses it once (template)
+#it will use place holders
+let temp = compile("[bold][fg=cyan][italic] Processing [fg=yellow][underline][0][fg=green][strike] from [dim][blink][fg=#FFFFFF] file 1 [reverse][fg=254] to end[reset]")
+
+for i in 0..1000000:
+   discard temp.apply(i)
+```
+
+
+# Contributing
+
+You can help improve Spectra by:
+
+- Trying to use it and giving feedback
+- Test the programs under different Windows versions or Linux distributions
+- Help improving and extending the code
+- Adding Windows support
 
