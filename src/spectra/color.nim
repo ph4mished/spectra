@@ -34,7 +34,7 @@ var colorToggle*: bool = true
 proc readString(tag: string): string =
   while tag.is]#
 
-proc compile(input: string): CompiledTemplate =
+proc compile*(input: string): CompiledTemplate =
   var 
     contentSequence = ""
     inReadSequence = false
