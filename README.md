@@ -300,7 +300,7 @@ let sEndTime = cpuTime()
 
 
 #checking for precompiled spectra
-let comp = compile("[bold fg=cyan italic] Processing [0] [fg=yellow underline fg=green strike]from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+let comp = compile("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
 
 let tStartTime = cpuTime()
 for i in 0..1000000:
