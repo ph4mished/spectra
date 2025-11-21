@@ -60,7 +60,19 @@ paint("[fg=202]Orange text[fg=45]Blue text[reset]")
 paint "[bold bg=yellow fg=cyan hidden]Sorry can't find me[hidden=reset]Oops! I've being caught[reset]"
 ```
 
+# Precompilation or Precomputation:
+Spectra isn't all that slow, instead of re-parsing per loop you can precompile your tags (so easy).
+Worried about manual interpolation??, just use indices(index) (square bracket bounded index). See the example below.
+``` nim
+let test = compile("[bold fg=red]Hello [0][fg=cyan blink][1][reset]")
 
+
+for i in 0..1000000:
+  echo test.apply("world", $i)
+
+#[0] and [1] are positional indices(index), which are used by "apply()" for interpolation
+#based on the parameters of apply(), [0]  ==> "world" and [1] ==> i
+```
 
 # Coloring a text
 ``` nim
@@ -329,18 +341,6 @@ Second Loop Duration [One Tag Per '[]']: 177.703688509 sec
 Third Loop Duration [Precomputed Spectra]: 4.864570024999978 sec
 Fourth Loop Duration [Without Spectra]: 1.2990780179999888sec
 
-```
-
-**This parsing overhead benchmark is a call for concern. The next update of spectra will include precompilation (although not implicit to paint())**
-
- This is how it will look 
- ``` nim
-#spectra parses it once (template)
-#it will use place holders
-let temp = compile("[bold][fg=cyan][italic] Processing [fg=yellow][underline][0][fg=green][strike] from [dim][blink][fg=#FFFFFF] file 1 [reverse][fg=254] to end[reset]")
-
-for i in 0..1000000:
-   discard temp.apply(i)
 ```
 
 
