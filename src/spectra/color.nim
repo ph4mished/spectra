@@ -1,95 +1,45 @@
 import strutils, tables, strformat, os
-import palette
+import color_helpers
+
+## This code is an inspiration/copy of https://github.com/Kashiwara0205/monkey-nim/blob/master/src/lexer/lexer.nim which is a nim implementation of the monkey language
+#type 
+  #Lexer* = object
+    #input*: string
+    #position*: int
+    #readPosition*: int
+    #ch*: byte
+#spectra direct coloring is to expensive for loops and inefficient for performance.
+#a proc will be added to compile first hand before looping.
+## eg.
+## let test = compile("[bold fg=red]Sorry I'm Red [reset]")
+## for i in 0..10000000:
+##   echo test.apply()
 
 
+type 
+  TempPart* = object
+    text*: string #tags and others are assumed strings
+    index*: int #all place holders will be converted to ints
 
-proc isValidHex(hexCode: string): bool =
-  try:
-    if hexCode[4..^1].len notin [6,8]: #for rrggbb and rrggbbaa
-      return false
-    for ch in hexCode[4..^1]:
-      if ch notin {'0'..'9', 'a'..'f', 'A'..'F'}:
-        return false
-    return true
-  except RangeDefect:
-    return false
-
-
-proc isValid256Code(paletteCode: string): bool =
-  try:
-    return parseInt(paletteCode[3..^1]) >= 0 and parseInt(paletteCode[3..^1]) <= 255
-  except Exception:
-    return false
-    
-  
-    
-  
-
-proc supportsTrueColor(): bool = 
-  return getEnv("COLORTERM") == "truecolor"
-
- 
-#this function was made to validate words in []
-proc isSupportedColor(input: string): bool = 
-  return input in paletteMap or input.isValidHex()  or input.isValid256Code() 
-
-
-proc parseHexToAnsiCode(hex: string): string =
-
-  if hex.len == 10:
-    #for #rrggbb
-    if supportsTrueColor():
-      let r = parseHexInt(hex[4..5])  #this is meant to extract RR
-      let g = parseHexInt(hex[6..7])  # this is meant to extract GG
-      let b = parseHexInt(hex[8..9])  #to extract BB
-      if hex.startsWith("bg="):
-        return fmt "\e[48;2;{r};{g};{b}m"
-      elif hex.startsWith("fg="):
-        return fmt "\e[38;2;{r};{g};{b}m"
-
-#Note:
-      #foreground colors use 38 and background colors use 48. the 2 is for truecolor support
-  #so its \e[38;2;R;G;Bm or for background \e[48;2;R;G;Bm 
-  #so the second row of number tells what color mode it is (2: rgb(24 bits), 245)
-  # 2 is for truecolor supported numbers that is rgb and its 24 bits using a range of 0-255
-  # 5 is for 256 palette(index 196)
-  #to avoid contradictions with values like c2020 which stands for copyright or other values that use c for prefix. 
-  # 256 palette support synax will be [c=214] = foreground color and [bg=214] = background color
-  # where c = color and bg = background color
-
-proc parse256ColorCode(colorCode: string): string =
-  if supportsTrueColor():
-    if colorCode.startsWith("bg="):
-      return fmt "\e[48;5;{colorCode[3..^1]}m"
-    elif colorCode.startsWith("fg="):
-      return fmt "\e[38;5;{colorCode[3..^1]}m"
-
-
-proc parseColor(color: string): string {.discardable.} = 
-  #this function is meant to receive string like "bold" "red" and other colors and
-  #convert them to their ansi codes
-    if color in paletteMap:
-      return color.replace(color, fmt "\e[{paletteMap[color]}m")
-
-    elif color.isValid256Code():
-      return parse256ColorCode(color)
-
-    elif color.isValidHex():
-      return parseHexToAnsiCode(color)
-    
-
-
-
+  CompiledTemplate* = object
+    parts*: seq[TempPart]
 # Global flag for toggling color
 #this one will be called when user want color toggling control globally
 var colorToggle*: bool = true
 
+#[proc readNumber(tag: string): string = 
+  while tag.isDigit():
+    readChar()
 
-proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.discardable.} =
+proc readString(tag: string): string =
+  while tag.is]#
+
+proc compile(input: string): CompiledTemplate =
   var 
-    color = ""
+    contentSequence = ""
     inReadSequence = false
-    output = ""
+    parts: seq[TempPart] = @[]
+    currentText = ""
     word = ""
     allWords: seq[string] = @[]
 
@@ -97,21 +47,26 @@ proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.di
     if ch == '[' and not inReadSequence:
       #check if the next value is "["
       if i + 1 < input.len and input[i+1] == '[':
-        output.add('[')
+        currentText.add('[')
         continue
       else:
         inReadSequence = true
-        color = ""
+        contentSequence = ""
         allWords.setLen(0)
-        word = ""
+
+        if currentText.len > 0:
+          parts.add(TempPart(text: currentText, index: -1))
+          currentText = ""
  
     elif ch == ']' and inReadSequence:
       inReadSequence = false
-
+      
+      #check if content is a placeholder or tag
+      #if contentSequence.len == 1 and contentSequence in {'0'..'9'}:
+        #parts.add(TempPart(text: "", placeholder: parseInt(contentSequence)))
+      #else:
     #if last word is present, add it
-      if word.len > 0:
-        allWords.add(word)
-        word = ""
+      allWords = contentSequence.splitWhiteSpace()
 
         #check if all words are colors
       var allColors = allWords.len > 0
@@ -129,30 +84,64 @@ proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.di
 
       if allColors:
         for w in allWords:
-          if forceColor:
-            output.add(parseColor(w))
-          else:
-            output.add("")
+          parts.add(TempPart(text: parseColor(w), index: -1))
+        
       else:
-        output.add("[" & color & "]")
-         
-        color = ""
-    #elif is
+        if parseInt(contentSequence) in {0..9}:
+          parts.add(TempPart(text: "", index: parseInt(contentSequence)))
+        else:
+          let addText = "[" & contentSequence & "]"
+          parts.add(TempPart(text: addText, index: -1))
+  
     elif inReadSequence:
-      color.add(ch)
-
-      if ch == ' ':
-        if word.len > 0:
-          allWords.add(word)
-          word = ""
-      else:
-        word.add(ch)
+      contentSequence.add(ch)
 
     else:
-      output.add(ch)
-     
-  if toStdout == true:
-    echo output
-  else:
-    return output
+      currentText.add(ch)
+  
+  if currentText.len > 0:
+    parts.add(TempPart(text: currentText, index: -1))
+  
+  result = CompiledTemplate(parts: parts)
 
+
+proc apply*(temp: CompiledTemplate, args: varargs[string]): string = 
+  for part in temp.parts:
+    if part.index < 0:
+      result.add(part.text)
+    else:
+      if part.index < args.len:
+        result.add(args[part.index])
+
+
+
+
+#[proc paint*(input: string, toStdout=true, forceColor = colorToggle): string {.discardable.} =
+  if toStdout:
+    echo compile(input)
+  else:
+    return (input)]#
+  
+
+when isMainModule:
+  import times
+  let startTime = cpuTime()
+  let filename = "example.txt"
+  let comp = compile("[bold fg=cyan italic] Processing [0] [fg=yellow underline fg=green strike]from [dim blinkfast   fg=#FFFFFF] file [1] [reverse fg=254]to end[reset]")
+
+
+  for i in 0..1000000:
+    #echo "Compiled: ", comp.apply($i, filename)
+    discard comp.apply($i)
+  let endTime = cpuTime()
+
+
+  #Checking without spectra
+  let nStartTime = cpuTime()
+  for i in 0..1000000:
+    discard fmt "Processing {i} from file 1  to end."
+  let nEndTime = cpuTime()
+
+
+  echo "First Loop Duration [With Compiled Spectra]: ", nEndTime-nStartTime, "sec"
+  echo "Last Loop Duration [Without Spectra]: ", nEndTime-nStartTime, "sec"
