@@ -21,17 +21,21 @@ Spectra supports Unix-like systems including Linux and macOS. Windows is not sup
 
 
 # Usage
-**Spectra supports more than one color tags in its square brackets bounded syntax (but one bad nut spoils all).** It means spectra supports 
+**Spectra supports more than one color tags in its square brackets bounded syntax (but one bad nut spoils all).** 
+
+It means spectra accepts this 
 ``` nim
-paint("[fg=white][bold italic strike fg=cyan]Hello World[reset]")
+echo compile("[fg=white][bold italic strike fg=cyan]Hello World[reset]").apply()
 #This will work perfectly 
 ```
 **but a typo goes unforgiven**
 ```nim
-paint("[fg=white][bld italic strike fg=cyan]Hello World[reset]")
+echo compile("[fg=white][bld italic strike fg=cyan]Hello World[reset]").apply()
 
 #"bld" is the bad nut, so all other tags enclosed in same [] are treated as literals.
 #hence it prints "[bld italic strike fg=cyan]Hello World" colored white due to the first color (fg=white). 
+
+#Because the tool sees it as an escape, not a typo
 ```
 
 # Importing the package
@@ -39,128 +43,164 @@ paint("[fg=white][bld italic strike fg=cyan]Hello World[reset]")
 import spectra
 ```
 
-## Usage Examples
-```nim
-import spectra
+# Precompilation or Precomputation:
+Spectra is **color template-first**. 
 
-#Multiple styles in one tag
-paint("[bold italic fg=red]Important![reset]")
-
-#Granular reset control
-paint("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=reset] Normal")
-
-#Hex colors
-paint("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]")
-
-#256 colors
-paint("[fg=202]Orange text[fg=45]Blue text[reset]")
+Reasons template-first coloring is preferred:
+- DRY Principle (Define once, use anywhere)
+- Pay parsing overhead cost once by precompiling (Performance boost)
 
 
-#Style example
-paint "[bold bg=yellow fg=cyan hidden]Sorry can't find me[hidden=reset]Oops! I've being caught[reset]"
-```
-
-# Precompilation or Precomputation [For Performance]:
-Spectra isn't all that slow, instead of re-parsing per loop you can precompile your tags (so easy).
-Worried about manual interpolation??, just use indices(index) (square bracket bounded index). See the example below.
+Worried about **manual interpolation or string concatenation**??
+Just use **indices (square bracket bounded numbers)**. See the example below.
 ``` nim
 let test = compile("[bold fg=red]Hello [0][fg=cyan blink][1][reset]")
+                                        ^                 ^             
+                                        |                 |
+                                        Indices/Placeholders 0 and 1 are slots awaiting dynamic input from apply()  
 
 
 for i in 0..1000000:
   echo test.apply("world", $i)
 
-#[0] and [1] are positional indices(index), which are used by "apply()" for interpolation
-#based on the parameters of apply(), [0]  ==> "world" and [1] ==> i
+#[0] and [1] are positional indices(index), which are used by "apply()" for interpolation.
+#Based on the parameters of apply(), [0]  ==> "world" and [1] ==> i
 ```
+
+
+
+## Usage Examples
+```nim
+import spectra
+
+#Multiple styles in one tag
+echo compile("[bold italic fg=red]Important![reset]").apply()
+
+
+#Granular reset control
+echo compile("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=reset] Normal").apply()
+
+
+#Hex colors
+echo compile("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]").apply()
+
+
+#256 colors
+echo compile("[fg=202]Orange text[fg=45]Blue text[reset]").apply()
+
+#Spectra for other languages through interpolation. Express Precompilation flexibility
+let lang_temp = compile("[fg=red][0]: [fg=green][1][reset]")
+
+echo lang_temp.apply("Error", "File not found") #English
+echo lang_temp.apply("Erreur", "Fichier non trouve") #French
+
+
+#Define once, use anywhere
+let help_temp = compile("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
+
+echo help_temp.apply("-h", "--help", "Show help and exit")
+echo help_temp.apply("-v", "--version", "Show version")
+echo help_temp.apply("-r", "--recursive", "Run recursively")
+
+```
+
 
 # Coloring a text
 ``` nim
-paint "[bold][fg=yellow]Hello Word[reset]"
+echo compile("[bold][fg=yellow]Hello Word[reset]").apply() 
 
-paint "[bold fg=red]Error:[bold=reset] File not found[reset]"
+echo compile("[bold fg=red]Error:[bold=reset] File not found[reset]").apply()
 
 #hex color
-paint "[fg=#FF0000 underline]DANGER[fg=reset underline=reset]"
+echo compile("[fg=#FF0000 underline]DANGER[fg=reset underline=reset]").apply()
 
 # 256 color support
-paint "                        [fg=255 bg=24]┌────────────────────┐[reset]"
-paint "                        [fg=255 bg=24]│     Submit         │[reset]"
-paint "                        [fg=255 bg=24]└────────────────────┘[reset]"
+let btnTemplate  = compile("[fg=255 bg=24][0][reset]")
+
+echo btnTemplate.apply("┌────────────────────┐")
+echo btnTemplate.apply("│       Submit       │")
+echo btnTemplate.apply("└────────────────────┘")
 
 ```
 
-# System Messages
+# Escapes
 ``` nim
-paint "[bold fg=white bg=#FF6B6B]CRITICAL[reset] CPU at 95%"
-paint "[bold fg=black bg=#F9C74F]WARNING[bold=reset bg=reset] Memory usage high[reset]"
-```
+#Normally no escapes are required if contents in "[ ]" are not colors or styles
+#For escape when contents are colors or styles, use apply()
 
-# Cli Tools
-``` nim
-paint "[bold fg=cyan]Usage:[fg=reset fg=green] ./tool [OPTIONS] [reset]"
-
-#or
-paint "[bold][fg=cyan]Usage: [fg=reset][fg=green] ./tool [OPTIONS] [reset]"
+#EXAMPLE
+echo compile("[fg=green bold]Hey Fred, be [0] and [1] hard[reset]").apply("[bold]", "[strike]") #Safe for escapes too
 ```
 
 # Color Toggling
-## Global Master Switch
 ``` nim
-import terminal  #imported for stdout.isatty()
-#colorToggle is the global switch for spectra color
-colorToggle = stdout.isatty()
 
-#prints only "ERROR" without color when its redirected to file or to another tool.
-paint "[fg=red]ERROR[reset]"
+#default color toggling
+# automatically switches off color when output is redirected or when terminal has NO_COLOR on
+newColorToggle()
 
 
-#color on
-colorToggle = true
-paint "[fg=green]Development Mode[reset]"
+newColorToggle(true) #Color always stays on
+newColorToggle(false) #Color always off
 
-#color off
-colorToggle = false
-paint "[fg=green]Sorry, I can't be colored[reset]"
 
-#respect for no color
-colorToggle= not paramStr(1) == "--no-color"
-paint("[fg=green]Ready[reset]")
+#EXAMPLES
+let toggle = newColorToggle()
+
+let help_temp = toggle.compile("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
+
+echo help_temp.apply("-h", "--help", "Show help and exit")
+echo help_temp.apply("-v", "--version", "Show version")
+echo help_temp.apply("-r", "--recursive", "Run recursively")
+
+#OR
+
+#still works without explicitly calling colorToggle
+#newColorToggle() is implicitly called by "compile()"
+let help_temp = compile("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2]")
+
+echo help_temp.apply("-h", "--help", "Show help and exit")
+echo help_temp.apply("-v", "--version", "Show version")
+echo help_temp.apply("-r", "--recursive", "Run recursively")
+
+
+
+
+#respect for no-color flag
+let no_color = newColorToggle(not paramStr(1) == "--no-color")
+echo compile(no_color, "[fg=green]Ready[reset]").apply()
 ```
 
-## Per-Call (global toggle override)
-``` nim
-#Force color (override global setting)
-#colorToggle will be called for global setting
-colorToggle = false
-
-
-#forceColor is used for per paint() call color control or to override colorToggle control
-paint("[bold italic strike fg=yellow]WARNING[reset]")
-
-paint("[fg=red]ALWAYS RED[reset]", forceColor=true)
-
-paint("[fg=blue]COLOR DEPENDS[reset]", forceColor=stdout.isatty())
-```
-
-# Output Control
-## Printing Color To Stdout
-``` nim
-paint("[bold fg=cyan]WELCOME![reset]")
-```
-
-## Return Results (Does not print)
-``` nim
-let greet = paint("[bold fg=green]GOOD DAY![reset]", toStdout=false)
-echo greet &  "World!"
-```
 
 # Spectra In Action
 ``` nim
-paint """[bold fg=magenta]Spectra[bold=reset]
-         brings [fg=cyan]colors[fg=reset] to life!
-         [fg=red]also[fg=yellow]in[fg=green]a[fg=blue]human[fg=#6600FF]friendly[fg=magenta]way[reset]
-         """
+#EXAMPLE ONE
+let itemTemp = compile("[0], [fg=cyan][1][reset]")
+
+let fruits = @["Apple", "Watermelon", "Grapes", "Banana"]
+for i, fruit in fruits:
+  echo itemTemp.apply($(i+1), fruit)
+
+
+#EXAMPLE TWO
+let temp_template = compile("Temperature: [0]")
+
+proc showTemp(temp: int) =
+  let color = if temp > 25: "[fg=red]" elif temp < 10: "[fg=blue]" else: "[fg=green]"
+  let comp = compile(color & "[0]°C[reset]")
+  echo temp_template.apply(comp.apply($temp))
+
+showTemp(25)
+showTemp(14)
+showTemp(4)
+
+#EXAMPLE THREE
+let loginTemp = compile("""
+Username: [fg=cyan][0][reset]
+Password: [fg=yellow][1][reset]
+""")
+
+echo loginTemp.apply("Jay Pal", "********")
 ```
 
 ## Beauty Of Spectra
@@ -169,27 +209,31 @@ paint """[bold fg=magenta]Spectra[bold=reset]
 
 # Create gradient-like effects with multiple colors
 #to recreate the unicode block below
-#to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
-paint("""
-[fg=#FF0000]▓▓▓[fg=#FF3300]▓▓▓[fg=#FF6600]▓▓▓[fg=#FF9900]▓▓▓[fg=#FFCC00]▓▓▓[reset]
-[fg=#CC0000]▓▓▓[fg=#CC3300]▓▓▓[fg=#CC6600]▓▓▓[fg=#CC9900]▓▓▓[fg=#CCCC00]▓▓▓[reset]
-[fg=#990000]▓▓▓[fg=#993300]▓▓▓[fg=#996600]▓▓▓[fg=#999900]▓▓▓[fg=#99CC00]▓▓▓[reset]
-""")
+echo compile("""
+[fg=#FF0000][0][fg=#FF3300][0][fg=#FF6600][0][fg=#FF9900][0][fg=#FFCC00][0][reset]
+[fg=#CC0000][0][fg=#CC3300][0][fg=#CC6600][0][fg=#CC9900][0][fg=#CCCC00][0][reset]
+[fg=#990000][0][fg=#993300][0][fg=#996600][0][fg=#999900][0][fg=#99CC00][0][reset]
+""").apply("▓▓▓")
+
 
 
 # Simple colored blocks and patterns
 #to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2588" and press enter
-paint("""
-[fg=red]████████[fg=green]████████[fg=blue]████████[reset]
-[fg=red]████████[fg=green]████████[fg=blue]████████[reset]
-[fg=yellow]████████[fg=magenta]████████[fg=cyan]████████[reset]
-""")
 
-paint("""
+let blkTemp = compile("[fg=red][0][fg=green][0][fg=blue][0][reset]")
+let lastTemp = compile("[fg=yellow][0][fg=magenta][0][fg=cyan][0][reset]\n")
+
+echo blkTemp.apply("████████")
+echo blkTemp.apply("████████")
+echo lastTemp.apply("████████")
+
+
+
+echo compile("""
 [fg=red]▄▄▄▄▄[fg=#FF6600]▄▄▄▄▄[fg=yellow]▄▄▄▄▄[fg=green]▄▄▄▄▄[fg=blue]▄▄▄▄▄[fg=#6600FF]▄▄▄▄▄[fg=magenta]▄▄▄▄▄[reset]
-""")
+""").apply()
 
 
 #ctrl+ shift+u + 250c = ┌
@@ -198,9 +242,11 @@ paint("""
 #ctrl+ shift+u + 2510 = ┐
 #ctrl+ shift+u + 2500 = ─
 #ctrl+ shift+u + 2502 = │
-paint "[fg=255 bg=24]┌────────────────────┐[reset]"
-paint "[fg=255 bg=24]│     Submit         │[reset]"
-paint "[fg=255 bg=24]└────────────────────┘[reset]"
+
+let btnTemplate  = compile("[fg=255 bg=24][0][reset]")
+echo btnTemplate.apply("┌────────────────────┐")
+echo btnTemplate.apply("│       Submit       │")
+echo btnTemplate.apply("└────────────────────┘")
 ```
 
 ## Results
@@ -298,48 +344,54 @@ I decided to test the speed of spectra parsing.
 import spectra, strformat, times
 
 #check for all in one parsing
+let comp = compile("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+
 let fStartTime = cpuTime()
 for i in 0..1000000:
-  discard paint(fmt"[bold fg=cyan italic] Processing [fg=yellow underline]{i}[fg=green strike]from [dim blink fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]", toStdout=false)
+  discard comp.apply($i)
 let fEndTime = cpuTime()
 
 
+
 #checking for one [] per tag parsing
+let oneTag = compile("[bold][fg=cyan][italic] Processing [fg=yellow][underline][0][fg=green][strike] from [dim][blinkfast][fg=#FFFFFF] file 1 [reverse][fg=254]to end[reset]")
+
 let sStartTime = cpuTime()
 for i in 0..1000000:
-  discard paint(fmt"[bold][fg=cyan][italic] Processing [fg=yellow][underline]{i}[fg=green][strike] from [dim][blink][fg=#FFFFFF] file 1 [reverse][fg=254] to end[reset]", toStdout=false)
+  discard oneTag.apply($i)
 let sEndTime = cpuTime()
 
 
-#checking for precompiled spectra
-let comp = compile("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
-
+#Checking without spectra
 let tStartTime = cpuTime()
 for i in 0..1000000:
-  discard comp.apply($i)
+  discard fmt "Processing {i} from file 1  to end."
 let tEndTime = cpuTime()
 
 
-#Checking without spectra
+#Check With Spectra (Without Interpolation)
+let last = compile("[bold fg=cyan italic] Processing [fg=yellow underline][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+
 let nStartTime = cpuTime()
 for i in 0..1000000:
-  discard fmt "Processing {i} from file 1  to end."
+  discard last.apply()
 let nEndTime = cpuTime()
+
 
 
 echo "First Loop Duration [All In One]: ", fEndTime-fStartTime, " sec"
 echo "Second Loop Duration [One Tag Per '[]']: ", sEndTime-sStartTime, " sec"
-echo "Third Loop Duration [Precomputed Spectra]: ", tEndTime-tStartTime, "sec"
-echo "Fourth Loop Duration [Without Spectra]: ", nEndTime-nStartTime, "sec"
+echo "Third Loop Duration [Without Spectra]: ", tEndTime-tStartTime, "sec"
+echo "Fourth Loop Duration [Spectra Without Interpolation]: ", nEndTime-nStartTime, "sec"
 
 ```
 
 ## Output
 ``` bash
-First Loop Duration [All In One]: 157.657935402 sec
-Second Loop Duration [One Tag Per '[]']: 177.703688509 sec
-Third Loop Duration [Precomputed Spectra]: 4.864570024999978 sec
-Fourth Loop Duration [Without Spectra]: 1.2990780179999888sec
+First Loop Duration [All In One]: 6.3444005699999995 sec
+Second Loop Duration [One Tag Per '[]']: 6.500923788999999 sec
+Third Loop Duration [Without Spectra]: 1.335062851sec
+Fourth Loop Duration [Spectra Without Interpolation]: 5.499566213000001sec
 
 ```
 
@@ -349,7 +401,7 @@ Fourth Loop Duration [Without Spectra]: 1.2990780179999888sec
 You can help improve Spectra by:
 
 - Trying to use it and giving feedback
-- Test the programs under different Windows versions or Linux distributions
+- Test the programs under different MacOS versions or Linux distributions
 - Help improving and extending the code
 - Adding Windows support
 
