@@ -21,7 +21,12 @@ for i in 0..1000:
   status.apply(i, filename)
   #where i = [0] and filename = [1]
 ```
+# Solved
+reparsing issue solved, now its 32x faster.
 
 # New issue
-reparsing issue solved, now its 32x faster. now spectra need caching,
-apply() gets the compiled results in segments and it needs to put them together, making it quite a bit expensive. so now it puts it together once and caches it, making it efficient for loops
+spectra need caching,
+apply() gets the compiled results in segments and it needs to put them together, making it quite a bit expensive.  about 6 times slower than normal formatting (thats too much).
+
+# Planned Soln
+- apply() puts it together once and caches it, making it efficient for loops
