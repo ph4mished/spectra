@@ -388,12 +388,18 @@ echo "Fourth Loop Duration [Spectra Without Interpolation]: ", nEndTime-nStartTi
 
 ## Output
 ``` bash
-First Loop Duration [All In One]: 6.3444005699999995 sec
-Second Loop Duration [One Tag Per '[]']: 6.500923788999999 sec
-Third Loop Duration [Without Spectra]: 1.335062851sec
-Fourth Loop Duration [Spectra Without Interpolation]: 5.499566213000001sec
+First Loop Duration [All In One]: 2.989775449 sec
+Second Loop Duration [One Tag Per '[]']: 3.0064548070000003 sec
+Third Loop Duration [Without Spectra]: 1.3103092410000006sec
+Fourth Loop Duration [Spectra Without Interpolation]: 1.9993790250000005sec
 
 ```
+## Note
+**The benchmark is to show how low spectra interpolation overhead is and how effiecient it is in loops.**
+
+**By default spectra is 48x faster than most color libraries for hot loops (all thanks to precomputation)**
+
+**Try it if you doubt this benchmark**
 
 
 # Contributing
