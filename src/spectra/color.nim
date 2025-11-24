@@ -23,7 +23,7 @@ proc autoDetect(): bool =
 proc newColorToggle*(enableColor: bool=autoDetect()): ColorToggle = 
   ColorToggle(enableColor: enableColor)
 
-proc compile*(toggle: ColorToggle=newColorToggle(), input: string): CompiledTemplate =
+proc parse*(toggle: ColorToggle=newColorToggle(), input: string): CompiledTemplate =
   var 
     contentSequence = ""
     inReadSequence = false
@@ -93,8 +93,8 @@ proc compile*(toggle: ColorToggle=newColorToggle(), input: string): CompiledTemp
   result = CompiledTemplate(parts: parts, totalLength: input.len)
   
 #Override
-proc compile*(input: string): CompiledTemplate =
-  return compile(newColorToggle(), input)
+proc parse*(input: string): CompiledTemplate =
+  return parse(newColorToggle(), input)
 
 
 proc apply*(temp: CompiledTemplate, args: varargs[string]): string {.discardable.}= 
@@ -112,4 +112,3 @@ proc apply*(temp: CompiledTemplate, args: varargs[string]): string {.discardable
     else:
       if part.index < args.len:
         result.add(args[part.index])
-    

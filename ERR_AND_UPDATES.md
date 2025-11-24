@@ -14,7 +14,7 @@ for i in 1..1000000:
 
 
 #Using precompiled
-let status = spectra.compile("[fg=cyan]Processing[0] for [1][reset]")
+let status = spectra.parse("[fg=cyan]Processing[0] for [1][reset]")
 
 for i in 0..1000000:
   status.apply(i, "example.txt")

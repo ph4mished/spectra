@@ -25,12 +25,12 @@ Spectra supports Unix-like systems including Linux and macOS. Windows is not sup
 
 It means spectra accepts this 
 ``` nim
-echo compile("[fg=white][bold italic strike fg=cyan]Hello World[reset]").apply()
+echo parse("[fg=white][bold italic strike fg=cyan]Hello World[reset]").apply()
 #This will work perfectly 
 ```
 **but a typo goes unforgiven**
 ```nim
-echo compile("[fg=white][bld italic strike fg=cyan]Hello World[reset]").apply()
+echo parse("[fg=white][bld italic strike fg=cyan]Hello World[reset]").apply()
 
 #"bld" is the bad nut, so all other tags enclosed in same [] are treated as literals.
 #hence it prints "[bld italic strike fg=cyan]Hello World" colored white due to the first color (fg=white). 
@@ -54,7 +54,7 @@ Reasons template-first coloring is preferred:
 Worried about **manual interpolation or string concatenation**??
 Just use **indices (square bracket bounded numbers)**. See the example below.
 ``` nim
-let test = compile("[bold fg=red]Hello [0][fg=cyan blink][1][reset]")
+let test = parse("[bold fg=red]Hello [0][fg=cyan blink][1][reset]")
                                         ^                 ^             
                                         |                 |
                                         Indices/Placeholders 0 and 1 are slots awaiting dynamic input from apply()  
@@ -74,29 +74,29 @@ for i in 0..1000000:
 import spectra
 
 #Multiple styles in one tag
-echo compile("[bold italic fg=red]Important![reset]").apply()
+echo parse("[bold italic fg=red]Important![reset]").apply()
 
 
 #Granular reset control
-echo compile("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=reset] Normal").apply()
+echo parse("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=reset] Normal").apply()
 
 
 #Hex colors
-echo compile("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]").apply()
+echo parse("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]").apply()
 
 
 #256 colors
-echo compile("[fg=202]Orange text[fg=45]Blue text[reset]").apply()
+echo parse("[fg=202]Orange text[fg=45]Blue text[reset]").apply()
 
 #Spectra for other languages through interpolation. Express Precompilation flexibility
-let lang_temp = compile("[fg=red][0]: [fg=green][1][reset]")
+let lang_temp = parse("[fg=red][0]: [fg=green][1][reset]")
 
 echo lang_temp.apply("Error", "File not found") #English
 echo lang_temp.apply("Erreur", "Fichier non trouve") #French
 
 
 #Define once, use anywhere
-let help_temp = compile("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
+let help_temp = parse("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
 
 echo help_temp.apply("-h", "--help", "Show help and exit")
 echo help_temp.apply("-v", "--version", "Show version")
@@ -107,15 +107,15 @@ echo help_temp.apply("-r", "--recursive", "Run recursively")
 
 # Coloring a text
 ``` nim
-echo compile("[bold][fg=yellow]Hello Word[reset]").apply() 
+echo parse("[bold][fg=yellow]Hello Word[reset]").apply() 
 
-echo compile("[bold fg=red]Error:[bold=reset] File not found[reset]").apply()
+echo parse("[bold fg=red]Error:[bold=reset] File not found[reset]").apply()
 
 #hex color
-echo compile("[fg=#FF0000 underline]DANGER[fg=reset underline=reset]").apply()
+echo parse("[fg=#FF0000 underline]DANGER[fg=reset underline=reset]").apply()
 
 # 256 color support
-let btnTemplate  = compile("[fg=255 bg=24][0][reset]")
+let btnTemplate  = parse("[fg=255 bg=24][0][reset]")
 
 echo btnTemplate.apply("┌────────────────────┐")
 echo btnTemplate.apply("│       Submit       │")
@@ -129,7 +129,7 @@ echo btnTemplate.apply("└─────────────────�
 #For escape when contents are colors or styles, use apply()
 
 #EXAMPLE
-echo compile("[fg=green bold]Hey Fred, be [0] and [1] hard[reset]").apply("[bold]", "[strike]") #Safe for escapes too
+echo parse("[fg=green bold]Hey Fred, be [0] and [1] hard[reset]").apply("[bold]", "[strike]") #Safe for escapes too
 ```
 
 # Color Toggling
@@ -147,17 +147,22 @@ newColorToggle(false) #Color always off
 #EXAMPLES
 let toggle = newColorToggle()
 
-let help_temp = toggle.compile("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
+let help_temp = toggle.parse("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
 
 echo help_temp.apply("-h", "--help", "Show help and exit")
 echo help_temp.apply("-v", "--version", "Show version")
 echo help_temp.apply("-r", "--recursive", "Run recursively")
 
 #OR
-
+## IMPLICIT newColorToggle() CALL
+##================================
 #still works without explicitly calling colorToggle
-#newColorToggle() is implicitly called by "compile()"
-let help_temp = compile("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2]")
+#newColorToggle() is implicitly called by "parse()" 
+#when used implicitly, each "parse()" call creates a newColorToggle()
+let help_temp = parse("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2]")
+let test_temp = parse("[bold fg=green]Test Me[reset]")
+
+#both test_temp and help_temp create newColorToggle() implicitly but they do not share. Each call creates its own
 
 echo help_temp.apply("-h", "--help", "Show help and exit")
 echo help_temp.apply("-v", "--version", "Show version")
@@ -168,14 +173,14 @@ echo help_temp.apply("-r", "--recursive", "Run recursively")
 
 #respect for no-color flag
 let no_color = newColorToggle(not paramStr(1) == "--no-color")
-echo compile(no_color, "[fg=green]Ready[reset]").apply()
+echo parse(no_color, "[fg=green]Ready[reset]").apply()
 ```
 
 
 # Spectra In Action
 ``` nim
 #EXAMPLE ONE
-let itemTemp = compile("[0], [fg=cyan][1][reset]")
+let itemTemp = parse("[0], [fg=cyan][1][reset]")
 
 let fruits = @["Apple", "Watermelon", "Grapes", "Banana"]
 for i, fruit in fruits:
@@ -183,11 +188,11 @@ for i, fruit in fruits:
 
 
 #EXAMPLE TWO
-let temp_template = compile("Temperature: [0]")
+let temp_template = parse("Temperature: [0]")
 
 proc showTemp(temp: int) =
   let color = if temp > 25: "[fg=red]" elif temp < 10: "[fg=blue]" else: "[fg=green]"
-  let comp = compile(color & "[0]°C[reset]")
+  let comp = parse(color & "[0]°C[reset]")
   echo temp_template.apply(comp.apply($temp))
 
 showTemp(25)
@@ -195,7 +200,7 @@ showTemp(14)
 showTemp(4)
 
 #EXAMPLE THREE
-let loginTemp = compile("""
+let loginTemp = parse("""
 Username: [fg=cyan][0][reset]
 Password: [fg=yellow][1][reset]
 """)
@@ -210,11 +215,11 @@ echo loginTemp.apply("Jay Pal", "********")
 # Create gradient-like effects with multiple colors
 #to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
-echo compile("""
+echo parse("""
 [fg=#FF0000][0][fg=#FF3300][0][fg=#FF6600][0][fg=#FF9900][0][fg=#FFCC00][0][reset]
 [fg=#CC0000][0][fg=#CC3300][0][fg=#CC6600][0][fg=#CC9900][0][fg=#CCCC00][0][reset]
 [fg=#990000][0][fg=#993300][0][fg=#996600][0][fg=#999900][0][fg=#99CC00][0][reset]
-""").apply("▓▓▓")
+""").apply("▓".repeat(3))
 
 
 
@@ -222,18 +227,18 @@ echo compile("""
 #to recreate the unicode block below
 #for linux, enter "Ctrl + Shift + u" and then type "2588" and press enter
 
-let blkTemp = compile("[fg=red][0][fg=green][0][fg=blue][0][reset]")
-let lastTemp = compile("[fg=yellow][0][fg=magenta][0][fg=cyan][0][reset]\n")
+let blkTemp = parse("[fg=red][0][fg=green][0][fg=blue][0][reset]")
+let lastTemp = parse("[fg=yellow][0][fg=magenta][0][fg=cyan][0][reset]\n")
 
-echo blkTemp.apply("████████")
-echo blkTemp.apply("████████")
-echo lastTemp.apply("████████")
+echo blkTemp.apply("█".repeat(8))
+echo blkTemp.apply("█".repeat(8))
+echo lastTemp.apply("█".repeat(8))
 
 
 
-echo compile("""
-[fg=red]▄▄▄▄▄[fg=#FF6600]▄▄▄▄▄[fg=yellow]▄▄▄▄▄[fg=green]▄▄▄▄▄[fg=blue]▄▄▄▄▄[fg=#6600FF]▄▄▄▄▄[fg=magenta]▄▄▄▄▄[reset]
-""").apply()
+echo parse("""
+[fg=red][0][fg=#FF6600][0][fg=yellow][0][fg=green][0][fg=blue][0][fg=#6600FF][0][fg=magenta][0][reset]
+""").apply("▄".repeat(5))
 
 
 #ctrl+ shift+u + 250c = ┌
@@ -243,10 +248,11 @@ echo compile("""
 #ctrl+ shift+u + 2500 = ─
 #ctrl+ shift+u + 2502 = │
 
-let btnTemplate  = compile("[fg=255 bg=24][0][reset]")
-echo btnTemplate.apply("┌────────────────────┐")
-echo btnTemplate.apply("│       Submit       │")
-echo btnTemplate.apply("└────────────────────┘")
+let btnTemplate = parse("[fg=255 bg=24][0][1][2][reset]")
+
+echo btnTemplate.apply("┌", "─".repeat(12), "┐")
+echo btnTemplate.apply("│", "   Submit   ", "│")
+echo btnTemplate.apply("└", "─".repeat(12), "┘")
 ```
 
 ## Results
@@ -344,7 +350,7 @@ I decided to test the speed of spectra parsing.
 import spectra, strformat, times
 
 #check for all in one parsing
-let comp = compile("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+let comp = parse("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
 
 let fStartTime = cpuTime()
 for i in 0..1000000:
@@ -354,7 +360,7 @@ let fEndTime = cpuTime()
 
 
 #checking for one [] per tag parsing
-let oneTag = compile("[bold][fg=cyan][italic] Processing [fg=yellow][underline][0][fg=green][strike] from [dim][blinkfast][fg=#FFFFFF] file 1 [reverse][fg=254]to end[reset]")
+let oneTag = parse("[bold][fg=cyan][italic] Processing [fg=yellow][underline][0][fg=green][strike] from [dim][blinkfast][fg=#FFFFFF] file 1 [reverse][fg=254]to end[reset]")
 
 let sStartTime = cpuTime()
 for i in 0..1000000:
@@ -370,7 +376,7 @@ let tEndTime = cpuTime()
 
 
 #Check With Spectra (Without Interpolation)
-let last = compile("[bold fg=cyan italic] Processing [fg=yellow underline][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+let last = parse("[bold fg=cyan italic] Processing [fg=yellow underline][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
 
 let nStartTime = cpuTime()
 for i in 0..1000000:

@@ -1,4 +1,4 @@
-import ../src/spectra
+import ../src/spectra, strutils
 
 #This example is to express how huewheel can be used for ascii arts
 
@@ -6,25 +6,29 @@ import ../src/spectra
 #to recreate the unicde block below
 #for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
 echo "\n\n\n\n\n"
-paint("""
-                            [fg=#FF0000]▓▓▓[fg=#FF3300]▓▓▓[fg=#FF6600]▓▓▓[fg=#FF9900]▓▓▓[fg=#FFCC00]▓▓▓[reset]
-                            [fg=#CC0000]▓▓▓[fg=#CC3300]▓▓▓[fg=#CC6600]▓▓▓[fg=#CC9900]▓▓▓[fg=#CCCC00]▓▓▓[reset]
-                            [fg=#990000]▓▓▓[fg=#993300]▓▓▓[fg=#996600]▓▓▓[fg=#999900]▓▓▓[fg=#99CC00]▓▓▓[reset]
-""")
+echo parse("""
+[fg=#FF0000][0][fg=#FF3300][0][fg=#FF6600][0][fg=#FF9900][0][fg=#FFCC00][0][reset]
+[fg=#CC0000][0][fg=#CC3300][0][fg=#CC6600][0][fg=#CC9900][0][fg=#CCCC00][0][reset]
+[fg=#990000][0][fg=#993300][0][fg=#996600][0][fg=#999900][0][fg=#99CC00][0][reset]
+""").apply("▓".repeat(3))
+
+
 
 # Simple colored blocks and patterns
 #to recreate the unicde block below
 #for linux, enter "Ctrl + Shift + u" and then type "2588" and press enter
-paint("""
-                       [fg=red]████████[fg=green]████████[fg=blue]████████[reset]
-                       [fg=red]████████[fg=green]████████[fg=blue]████████[reset]
-                       [fg=yellow]████████[fg=magenta]████████[fg=cyan]████████[reset]
-""")
+let blkTemp = parse("[fg=red][0][fg=green][0][fg=blue][0][reset]")
+let lastTemp = parse("[fg=yellow][0][fg=magenta][0][fg=cyan][0][reset]\n")
+
+echo blkTemp.apply("█".repeat(8))
+echo blkTemp.apply("█".repeat(8))
+echo lastTemp.apply("█".repeat(8))
+
 
 
 
 # Colored cat face
-paint("""
+echo parse("""
 [bold=reset fg=yellow]   /\\_/\\  
   ( o.o ) 
    > ^ <
@@ -34,12 +38,12 @@ paint("""
   ( -.- ) 
    > ^ <
 [reset]
-""")
+""").apply()
 
 
 
 #Arrow
-paint("""
+echo parse("""
 [fg=green]     *
     ***
    *****
@@ -49,12 +53,12 @@ paint("""
     ***
     ***
 [reset]
-""")
+""").apply()
 
 
 
 #Rocket
-paint("""
+echo parse("""
 [fg=white]     /\\
     /  \\
    /____\\
@@ -64,15 +68,15 @@ paint("""
  / |    | \\
 [fg=yellow]*  [fg=red]/\\  /\\[reset]  *
 [reset]
-""")
+""").apply()
 
 
 
-paint("""
+echo parse("""
 [fg=yellow]  -----
  | o o |
  |  ^  |
- | \\_/ |
+ | \_/ |
   -----
 [reset]
 
@@ -82,19 +86,19 @@ paint("""
  | ___ |
   -----
 [reset]
-""")
+""").apply()
 
 
 
-paint("""
-                  [bold fg=red]▄▄▄▄▄[fg=#FF6600]▄▄▄▄▄[fg=yellow]▄▄▄▄▄[fg=green]▄▄▄▄▄[fg=reset][fg=blue]▄▄▄▄▄[fg=#6600FF]▄▄▄▄▄[fg=magenta]▄▄▄▄▄[reset]
-""")
+echo parse("""
+[fg=red][0][fg=#FF6600][0][fg=yellow][0][fg=green][0][fg=blue][0][fg=#6600FF][0][fg=magenta][0][reset]
+""").apply("▄".repeat(5))
 
 
 
 
 
-paint("""
+echo parse("""
 [bold fg=yellow]    *       *       *
        *       *    
   *         *        *
@@ -102,18 +106,18 @@ paint("""
         *     *
 [fg=yellow]    *       *       *
 [reset]
-""")
+""").apply()
 
 
 
-paint("""
+echo parse("""
 [fg=magenta]  .     .     .
    \\___/ \\___/
   /\\___/\\___/\\
   \\/___\\/___\\/
 [fg=blue]  .     .     .
 [reset]
-""")
+""").apply()
 
 #ctrl+ shift+u + 250c = ┌
 #ctrl+ shift+u + 2514 = └
@@ -121,9 +125,9 @@ paint("""
 #ctrl+ shift+u + 2510 = ┐
 #ctrl+ shift+u + 2500 = ─
 #ctrl+ shift+u + 2502 = │
-paint "                        [fg=255 bg=24]┌────────────────────┐[reset]"
-paint "                        [fg=255 bg=24]│     Submit         │[reset]"
-paint "                        [fg=255 bg=24]└────────────────────┘[reset]"
-
+let btnTemplate  = parse("[fg=255 bg=24][0][reset]")
+echo btnTemplate.apply("┌────────────────────┐")
+echo btnTemplate.apply("│       Submit       │")
+echo btnTemplate.apply("└────────────────────┘")
 
 
