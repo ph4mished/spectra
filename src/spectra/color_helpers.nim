@@ -4,6 +4,9 @@ import palette
 #rgb and hsl will be added
 #as in rgb with percentages vs rgb with actual numbers
 
+#RGB has being added
+#a hex and rgb fallback is needed. where terminal doesnt support such, it reverts back to 256
+
 ## ==================================================
 ## To enable ansi color support on windows
 ## ==================================================
@@ -42,20 +45,52 @@ proc isValid256Code(paletteCode: string): bool =
     return false
     
   
-    
+    #fg=rgb(120,0,0)
+proc isValidRGB(rgbCode: string): bool =
+  #Just a simple check is enough
+  return rgbCode[3..6] == "rgb(" and rgbCode[^1] == ')'
   
 
 proc supportsTrueColor(): bool = 
-  return getEnv("COLORTERM") == "truecolor"
+  return getEnv("COLORTERM") in ["truecolor", "24bit"]
 
  
 #this function was made to validate words in []
 proc isSupportedColor*(input: string): bool = 
-  return input in paletteMap or input.isValidHex()  or input.isValid256Code() 
+  return input in paletteMap or input.isValidHex()  or input.isValid256Code() or input.isValidRGB()
+
+#i guess could be used for hsl too.
+proc readRGB(rgbCode: string): seq[int] = 
+  var 
+    num = ""
+    allNum: seq[int] = @[]
+  
+  for ch in rgbCode:
+    if ch.isDigit():
+      num.add(ch)
+
+    elif ch == ',' and num.len > 0:
+      allNum.add(parseInt(num))
+      num = ""
+        
+    else:
+      #last number
+      if num.len > 0:
+       allNum.add(parseInt(num))
+  return allNum
+
+
+proc parseRGBToAnsiCode(rgbCode: string): string = 
+  if supportsTrueColor():
+    let RGB = readRGB(rgbCode)
+    if rgbCode.startsWith("bg="):
+      return fmt "\e[48;2;{RGB[0]};{RGB[1]};{RGB[2]}m"
+    elif rgbCode.startsWith("fg="):
+      return fmt "\e[38;2;{RGB[0]};{RGB[1]};{RGB[2]}m"
+
 
 
 proc parseHexToAnsiCode(hex: string): string =
-
   if hex.len == 10:
     #for #rrggbb
     if supportsTrueColor():
@@ -66,6 +101,7 @@ proc parseHexToAnsiCode(hex: string): string =
         return fmt "\e[48;2;{r};{g};{b}m"
       elif hex.startsWith("fg="):
         return fmt "\e[38;2;{r};{g};{b}m"
+    #fallback to 256. [N/Y]
 
 #Note:
       #foreground colors use 38 and background colors use 48. the 2 is for truecolor support
@@ -94,4 +130,7 @@ proc parseColor*(color: string): string {.discardable.} =
 
   elif color.isValidHex():
     return parseHexToAnsiCode(color)
+
+  elif color.isValidRGB():
+    return parseRGBToAnsiCode(color)
     

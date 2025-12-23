@@ -12,9 +12,9 @@ nimble install spectra
 - Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
 - Spectra uses [ ]-enclosed syntax but its not an owned syntax. **Users are free to use "[ ]" for anything of their choice without needing escapes, only if its content does not count as spectra tag/color.**
  
-**Spectra has true color support**, depending on your terminal's true color support. This is achieved through its hex colors.
+**Spectra has true color support**, depending on your terminal's true color support. This is achieved through its hex and RGB colors.
 
-When true-color is not available, **hex colors will not be rendered**
+When true-color is not available, **hex and RGB colors will not be rendered**
 
 # Limitation
 Spectra supports Unix-like systems including Linux and macOS. Windows is not supported due to different terminal architecture.
@@ -55,9 +55,9 @@ Worried about **manual interpolation or string concatenation**??
 Just use **indices (square bracket bounded numbers)**. See the example below.
 ``` nim
 let test = parse("[bold fg=red]Hello [0][fg=cyan blink][1][reset]")
-                                        ^                 ^             
-                                        |                 |
-                                        Indices/Placeholders 0 and 1 are slots awaiting dynamic input from apply()  
+                                      ^                 ^             
+                                      |                 |
+                                      Indices/Placeholders 0 and 1 are slots awaiting dynamic input from apply()  
 
 
 for i in 0..1000000:
@@ -83,6 +83,9 @@ echo parse("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=res
 
 #Hex colors
 echo parse("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]").apply()
+
+#RGB colors
+echo parse("[fg=rgb(255,0,0)]Red text[fg=rgb(0,255,0)]Green text[reset]").apply()
 
 
 #256 colors
@@ -207,6 +210,43 @@ Password: [fg=yellow][1][reset]
 
 echo loginTemp.apply("Jay Pal", "********")
 ```
+## For Projects
+### Style File (Define spectra colors upfront)
+```nim
+ # styles.nim
+ import spectra, terminal
+
+let toggle = newColorToggle(not noColor and stdout.isatty())
+
+let help* = (
+  header: toggle.parse( "[bold fg=cyan][0][reset]"),
+  description: toggle.parse("[bold fg=magenta][0][reset]"),
+  section: toggle.parse("\n[bold fg=blue][[fg=cyan][0][fg=blue]][reset]\n"),
+  flag: toggle.parse("\t[bold fg=#FF6600][0][fg=green], [fg=#FF6600][1] [fg=green]: [2][reset]")
+)
+```
+
+### Help File (Applying defined colors)
+```nim
+# help.nim
+import strutils, strformat
+include styles
+
+
+proc helpFunc*() =
+  echo help.description.apply(" cp - copy files and directories.")
+  echo help.description.apply("Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.")
+  
+  echo help.header.apply("\nUsage: cp [OPTIONS] SOURCE DEST")
+  
+  echo help.section.apply("OPTIONS")
+  echo help.flag.apply("-h", "--help", "display this help and exit")
+  echo help.flag.apply("-v", "--version", "output version information and exit")
+  echo help.flag.apply("", "--verbose", "explain what is being done")
+  echo help.flag.apply("-l", "--link", "hard link files instead of copying")
+```
+
+
 
 ## Beauty Of Spectra
 ``` nim
@@ -340,6 +380,8 @@ echo btnTemplate.apply("└", "─".repeat(12), "┘")
 |---------|--------|
 | `fg=#RRGGBB` | Hex color for foreground |
 | `bg=#RRGGBB` | Hex color for background |
+| `fg=rgb(RR,GG,BB)` |RGB color for foreground |
+| `bg=rgb(RR,GG,BB)` | RGB color for background |
 | `fg=NNN` | 256-color palette (0-255) for foreground |
 | `bg=NNN` | 256-color palette (0-255) for background |
 
