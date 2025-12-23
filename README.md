@@ -387,67 +387,51 @@ echo btnTemplate.apply("└", "─".repeat(12), "┘")
 
 
 # Parsing Overhead Benchmark
-I decided to test the speed of spectra parsing.
+I decided to test the speed of spectra interpolation.
 ``` nim
-import spectra, strformat, times
+import strformat, spectra, times
 
-#check for all in one parsing
-let comp = parse("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+proc fibonacci(n : int) : int = 
+  if n < 0:
+    return 0
+  if n <= 1:
+    return n
 
+  return fibonacci(n - 1) + fibonacci(n - 2)
+
+
+#Pure Nim
 let fStartTime = cpuTime()
-for i in 0..1000000:
-  discard comp.apply($i)
+for i in 0..40:
+  echo fmt"fibonacci({i}) = {fibonacci(i)}"
 let fEndTime = cpuTime()
 
-
-
-#checking for one [] per tag parsing
-let oneTag = parse("[bold][fg=cyan][italic] Processing [fg=yellow][underline][0][fg=green][strike] from [dim][blinkfast][fg=#FFFFFF] file 1 [reverse][fg=254]to end[reset]")
-
+#Spectra
+let temp = parse("[bold fg=blue][0][fg=yellow] = [fg=blue][1][reset]")
 let sStartTime = cpuTime()
-for i in 0..1000000:
-  discard oneTag.apply($i)
+for i in 0..40:
+  echo temp.apply(fmt"fibonacci({i})", $fibonacci(i))
 let sEndTime = cpuTime()
 
 
-#Checking without spectra
-let tStartTime = cpuTime()
-for i in 0..1000000:
-  discard fmt "Processing {i} from file 1  to end."
-let tEndTime = cpuTime()
+echo fmt"Fibonacci Duration For Pure Nim: {fEndTime-fStartTime}sec"
+echo fmt"Fibonacci Duration For Spectra: {sEndTime-sStartTime}sec"
 
-
-#Check With Spectra (Without Interpolation)
-let last = parse("[bold fg=cyan italic] Processing [fg=yellow underline][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
-
-let nStartTime = cpuTime()
-for i in 0..1000000:
-  discard last.apply()
-let nEndTime = cpuTime()
-
-
-
-echo "First Loop Duration [All In One]: ", fEndTime-fStartTime, " sec"
-echo "Second Loop Duration [One Tag Per '[]']: ", sEndTime-sStartTime, " sec"
-echo "Third Loop Duration [Without Spectra]: ", tEndTime-tStartTime, "sec"
-echo "Fourth Loop Duration [Spectra Without Interpolation]: ", nEndTime-nStartTime, "sec"
 
 ```
 
 ## Output
 ``` bash
-First Loop Duration [All In One]: 2.989775449 sec
-Second Loop Duration [One Tag Per '[]']: 3.0064548070000003 sec
-Third Loop Duration [Without Spectra]: 1.3103092410000006sec
-Fourth Loop Duration [Spectra Without Interpolation]: 1.9993790250000005sec
+Fibonacci Duration For Pure Nim: 26.085795425sec
+Fibonacci Duration For Spectra: 26.079776254sec
 
 ```
 ## Note
-**The benchmark is to show how low spectra interpolation overhead is and how effiecient it is in loops.**
+**The benchmark is to show how low spectra interpolation overhead is.**
 
-**By default spectra is 48x faster than most color libraries for hot loops (all thanks to precomputation)**
+**By default spectra is 48x faster than most naive color libraries for hot loops (all thanks to precomputation)**
 
-**Try it if you doubt this benchmark**
+**Test it if you doubt this benchmark results**
 
 
 # Contributing
