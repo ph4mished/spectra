@@ -1,12 +1,9 @@
 import strutils, strformat, os, tables, sequtils#, winim/lean
 import palette
   
-# hsl will be added
-#hsl maybe added as a dev convenience feature, although not a terminal supported color system
-#need to convert hsl to rgb
 
 
-#a hex and rgb fallback is needed. where terminal doesnt support such, it reverts back to 256
+#a hex and rgb fallback will be added. where terminal doesn't support such, it reverts back to 256
 
 ## ==================================================
 ## To enable ansi color support on windows
@@ -30,7 +27,7 @@ proc initColorizeEcho*() {.discardable.} =
 proc isValidHex(hexCode: string): bool =
   #fg=#AABBCC
   try:
-    return hexCode[4..^1].len in [6,8] and allIt(mapIt(hexCode[4..^1], $it), it.allCharsInSet(HexDigits)) #for rrggbb and rrggbbaa
+    return hexCode[4..^1].len == 6 and allIt(mapIt(hexCode[4..^1], $it), it.allCharsInSet(HexDigits)) #for rrggbb
   except RangeDefect:
     return false
 
@@ -60,26 +57,14 @@ proc supportsTrueColor(): bool =
 proc isSupportedColor*(input: string): bool = 
   return input in colorMap or input in resetMap or input in styleMap or input.isValidHex() or input.isValid256Code() or input.isValidRGB()
 
-#i guess could be used for hsl too.
-#need digit boundary guard 0-255
-proc readRGB(rgbCode: string): seq[int] = 
-  var 
-    num = ""
-    allNum: seq[int] = @[]
-  
-  for ch in rgbCode:
-    if ch.isDigit():
-      num.add(ch)
 
-    elif ch == ',' and num.len > 0:
-      allNum.add(parseInt(num))
-      num = ""
-        
-    else:
-      #last number
-      if num.len > 0:
-       allNum.add(parseInt(num))
-  return allNum
+#Get rgb values
+# fg=rgb(255,0,0)
+proc readRGB(code: string): seq[int]=  
+  for num in code[7..^2].split(","):
+    result.add(parseInt(num))
+    
+
 
 
 proc parseRGBToAnsiCode(rgbCode: string): string = 
