@@ -299,6 +299,15 @@ echo btnTemplate.apply("└", "─".repeat(12), "┘")
 ![beauty](/example_result/beauty.png)
 
 
+# Spectra Syntax Reference On Terminal
+``` nim
+import spectra
+#view color syntax and corresponding output
+listColors()
+
+#view style syntax and corresponding output
+listStyles()
+```
 
 # Spectra Syntax Reference
 
@@ -351,9 +360,10 @@ echo btnTemplate.apply("└", "─".repeat(12), "┘")
 | `bold` | Bold/bright text |
 | `dim` | Dim/faint text |
 | `italic` | Italic text |
-| `underline` | Underlined text |
-| `blink` | Slow blinking text |
-| `blinkfast` | Fast blinking text |
+| `underline=single` | Single underlined text |
+| `underline=double` | Double underlined text |
+| `blink=slow` | Slow blinking text |
+| `blink=fast` | Fast blinking text |
 | `reverse` | Reverse video (swap foreground and background colors) |
 | `hidden` | Hidden text |
 | `strike` | Strikethrough text |

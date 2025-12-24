@@ -1,22 +1,6 @@
 import tables
 
-let paletteMap* = {
-  #these are the reset colors for foreground and background colors  
-  "reset":               "0", #reset all styles
-  "fg=reset":            "39", #resets foreground colors
-  "bg=reset":           "49", #reset background colors
-   #"resetBold": "21", 2 is not mostly supported
-  "bold=reset": "22",
-  "dim=reset": "22",
-  "italic=reset": "23",
-  "underline=reset": "24",
-  "blink=reset": "25",
-  "blinkfast=reset": "26",
-  "reverse=reset": "27",
-  "hidden=reset": "28",
-  "strike=reset": "29",
-
-
+let colorMap* = {
   # Foreground colors
   "fg=black":              "30",
   "fg=red":                "31",
@@ -34,6 +18,7 @@ let paletteMap* = {
   "fg=lightmagenta":       "95",
   "fg=lightcyan":          "96",
   "fg=lightwhite":         "97",
+  
 
   # Background colors
   "bg=black":             "40",
@@ -51,18 +36,38 @@ let paletteMap* = {
   "bg=lightblue":         "104",
   "bg=lightmagenta":      "105",
   "bg=lightcyan":         "106",
-  "bg=lightwhite":        "107",
+  "bg=lightwhite":        "107"
+}.toTable
 
+let resetMap* = {
+  #these are the reset colors for foreground and background colors  
+  "reset":               "0",  #reset all styles
+  "fg=reset":            "39", #resets foreground colors
+  "bg=reset":           "49", #reset background colors
+   #"resetBold": "21", 2 is not mostly supported
+  "bold=reset": "22",
+  "dim=reset": "22",
+  "italic=reset": "23",
+  "underline=reset": "24",
+  "blink=reset": "25",
+  "blinkfast=reset": "26",
+  "reverse=reset": "27",
+  "hidden=reset": "28",
+  "strike=reset": "29"
+}.toTable
+
+let styleMap* = {
   #styles
   "bold": "1", #bold/bright
   "dim": "2",   #dim/faint
   "italic": "3",
-  "underline": "4",
-  "blink": "5",  #slow blink
-  "blinkfast": "6",  #fast blink
+  "underline=single": "4",   #52 is also single underline
+  "blink=slow": "5",  #slow blink
+  "blink=fast": "6",  #fast blink #Some platforms show no difference between slow and fast blink
   "reverse": "7",
   "hidden": "8",
-  "strike": "9"  #strike-through
+  "strike": "9" , #strike-through,
+  "underline=double": "4"
 }.toTable
 
 

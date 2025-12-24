@@ -1,10 +1,11 @@
-import strutils, strformat, os, tables#, winim/lean
+import strutils, strformat, os, tables, sequtils#, winim/lean
 import palette
   
-#rgb and hsl will be added
-#as in rgb with percentages vs rgb with actual numbers
+# hsl will be added
+#hsl maybe added as a dev convenience feature, although not a terminal supported color system
+#need to convert hsl to rgb
 
-#RGB has being added
+
 #a hex and rgb fallback is needed. where terminal doesnt support such, it reverts back to 256
 
 ## ==================================================
@@ -27,13 +28,9 @@ proc initColorizeEcho*() {.discardable.} =
     setConsoleMode(handle, MODE)]#
 
 proc isValidHex(hexCode: string): bool =
+  #fg=#AABBCC
   try:
-    if hexCode[4..^1].len notin [6,8]: #for rrggbb and rrggbbaa
-      return false
-    for ch in hexCode[4..^1]:
-      if ch notin {'0'..'9', 'a'..'f', 'A'..'F'}:
-        return false
-    return true
+    return hexCode[4..^1].len in [6,8] and allIt(mapIt(hexCode[4..^1], $it), it.allCharsInSet(HexDigits)) #for rrggbb and rrggbbaa
   except RangeDefect:
     return false
 
@@ -45,10 +42,14 @@ proc isValid256Code(paletteCode: string): bool =
     return false
     
   
-    #fg=rgb(120,0,0)
 proc isValidRGB(rgbCode: string): bool =
-  #Just a simple check is enough
-  return rgbCode[3..6] == "rgb(" and rgbCode[^1] == ')'
+  try:
+    #fg=rgb(255,0,0)
+    return rgbCode[3..6] == "rgb(" and rgbCode[^1] == ')' and  allIt(rgbCode[7..^2].split(","), it.allCharsInSet(Digits) and it.parseInt in 0..255)
+  #allIt() iterates through every string in the sequence, for each string, 'it.' represents that string.
+  #So it.allCharInSet(Digits) checks if that string contains only digits
+  except RangeDefect, IndexDefect:
+    return false
   
 
 proc supportsTrueColor(): bool = 
@@ -57,9 +58,10 @@ proc supportsTrueColor(): bool =
  
 #this function was made to validate words in []
 proc isSupportedColor*(input: string): bool = 
-  return input in paletteMap or input.isValidHex()  or input.isValid256Code() or input.isValidRGB()
+  return input in colorMap or input in resetMap or input in styleMap or input.isValidHex() or input.isValid256Code() or input.isValidRGB()
 
 #i guess could be used for hsl too.
+#need digit boundary guard 0-255
 proc readRGB(rgbCode: string): seq[int] = 
   var 
     num = ""
@@ -122,8 +124,14 @@ proc parse256ColorCode(colorCode: string): string =
 proc parseColor*(color: string): string {.discardable.} = 
   #this function is meant to receive string like "bold" "fg=red" and other colors and
   #convert them to their ansi codes
-  if color in paletteMap:
-    return color.replace(color, fmt "\e[{paletteMap[color]}m")
+  if color in colorMap:
+    return color.replace(color, fmt "\e[{colorMap[color]}m")
+
+  elif color in styleMap:
+    return color.replace(color, fmt "\e[{styleMap[color]}m")
+
+  elif color in resetMap:
+    return color.replace(color, fmt "\e[{resetMap[color]}m")
 
   elif color.isValid256Code():
     return parse256ColorCode(color)
