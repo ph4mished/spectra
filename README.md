@@ -450,4 +450,4 @@ You can help improve Spectra by:
 
 
 # SPECTRA CREED
-We believe terminal coloring should be **predictable, fast** and **explicit**. We optimize for productiona performance over development convenience, and for runtime efficiency over typo forgiveness. Our users value speed and reliability over 
+We believe terminal coloring should be **predictable, fast** and **explicit**. We optimize for productiona performance over development convenience, and for runtime efficiency over typo forgiveness. Our users value speed and reliability above all else.
