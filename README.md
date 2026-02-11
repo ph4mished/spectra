@@ -607,8 +607,6 @@ nim c -r test1.ni && nim c -r test2
 1. Better Windows compatibility
 2. 256-color fallback for truecolor
 3. Performance optimization
-4. More color spaces (HSL, HSV)
-5. Gradient support
 
 # License
 
@@ -617,60 +615,14 @@ MIT License - see LICENSE file for details.
 # Acknowledgments
 
 - ANSI escape code specifications
-- The Go community for testing and feedback
+- The Nim community for testing and feedback
 - All contributors who have helped improve this library
 
 ---
 
 **Note**: Always test color output in different terminals to ensure compatibility with your users' environments. Consider providing a --no-color flag in your applications for users who prefer plain text.
+
 # color
-A port of spectra color library to golang
-
-This library provides a powerful, performance-optimized way to add colors to your Go CLI applications while respecting user preferences and terminal capabilities.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Spectra has a port in Golang called [color](https://www.github.com/ph4mished/color)
 
 
