@@ -1,3 +1,3 @@
-import spectra/color
+import spectra/color, spectra/color_helpers
 
-export color
+export color, color_helpers

@@ -1,5 +1,5 @@
-import strutils, os, terminal, math, sequtils, tables, strformat
-import color_helpers, palette
+import strutils, os, terminal, math, sequtils
+import color_helpers
 
 type 
   TempPart* = object
@@ -79,9 +79,11 @@ proc parse*(toggle: ColorToggle=newColorToggle(), input: string): CompiledTempla
         
       else:
         if contentSequence.len > 0 and  all(contentSequence, isDigit):
-          #decided to make it flexible and accept more indices but its still prone to overflow
-          #needs a digit boundary guard
-          parts.add(TempPart(text: "", index: parseInt(contentSequence)))
+          if parseInt(contentSequence) in 0..999:
+            parts.add(TempPart(text: "", index: parseInt(contentSequence)))
+          else:
+            let addText = "[" & contentSequence & "]"
+            parts.add(TempPart(text: addText, index: -1))
         else:
           let addText = "[" & contentSequence & "]"
           parts.add(TempPart(text: addText, index: -1))
@@ -101,6 +103,9 @@ proc parse*(toggle: ColorToggle=newColorToggle(), input: string): CompiledTempla
 proc parse*(input: string): CompiledTemplate =
   return parse(newColorToggle(), input)
 
+#proc parseColor*(input: string): string = 
+ # return parseColor(input)
+
 
 proc apply*(temp: CompiledTemplate, args: varargs[string]): string {.discardable.}= 
 
@@ -117,24 +122,4 @@ proc apply*(temp: CompiledTemplate, args: varargs[string]): string {.discardable
     else:
       if part.index < args.len:
         result.add(args[part.index])
-
-
-
-# A  convenience function to list supported colors
-#proper formatting is on the way
-proc listColors*() =
-  for key, val in colorMap.pairs:
-    echo fmt "Color: {key}  | \e[{val}m▒▒▒▒▒▒▒\e[0m\n"
-
-
-#[proc listResets*() =
-  for key, val in resetMap.pairs:
-    echo fmt "Style: {key}  | \e[{val}mHello World\e[0m\n"
-]#
-    
-proc listStyles*() =
-  for key, val in styleMap.pairs:
-    echo fmt "Style: {key}  | \e[{val}mHello World\e[0m\n"
-
-
 

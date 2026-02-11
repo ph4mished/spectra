@@ -3,218 +3,267 @@
 **Spectra** is a high performance library for terminal text coloring and formatting.
 
 # Installation
-``` nim
+
+```bash
 nimble install spectra
 ```
 
 # Features
-- It supports granular resets, Only what you close resets (foreground, background, or text styles) as well as one-for-all reset (reset).
-- Support for multiple color systems {basic ANSI colors, hex colors and 256-color Palette}.
-- Spectra uses [ ]-enclosed syntax but its not an owned syntax. **Users are free to use "[ ]" for anything of their choice without needing escapes, only if its content does not count as spectra tag/color.**
+
+- Multiple Color Systems: Named colors, hex codes, RGB, 256-color palette
+- TrueColor Detection: Automatic detection of terminal truecolor support
+- Terminal Safe: Graceful fallbacks when color not supported(no-color fallback)
+- Simple API: Easy-to-use functions for text styling and coloring.
+- Comprehensive Styles: Bold, italic, underline, blink, reverse, hidden, strike-through
+- Granular Resets: Individual and full reset codes for precise control
+- No Escape: Texts in [] that aren't colors/styles are left as it is.
+
+# Core Concepts
+
+## Template System
+
+The library follows a template-first approach: parse color templates once with or without placeholders([0], [1], etc), then reuse them with different data to replace placeholders.
+**Placeholders are like slots**
+
+## Color Toggling
+
+Respects the NO_COLOR environment variable and detects when output is redirected. It can be manually controlled to suit user preference.
+
+---
+
+# Quick Start
+
+```nim
+
+import strformat, spectra
+
+
+# Parse and use color codes directly
+let red = parseColor("fg=red")
+let bold = parseColor("bold")
+let reset = parseColor("reset")
+    
+echo fmt"{red}{bold}This is red and bold!{reset}"
+
+# Check if a color is supported
+if isSupportedColor("fg=#FF0000"):
+  echo "Hex colors are supported!"
+  
+    
+# Or use the main functions
+parse("[fg=blue]Hello in blue![reset]").apply()
+parse("[bg=yellow fg=black bold]Bold black text on yellow background.[reset]").apply()
+
+
+# Or pre-parse the color template with placeholders for reuse. 
+# This is the heart of the library's performance.
+
+# Parse once
+let temp = parse("[fg=red bold]Error: [0][reset]")
+
+# Reuse multiple times
+echo temp.apply("File not found")
+echo temp.apply("Permission denied")
+echo temp.apply("Network timeout")
+
+
+```
+
+# Complete Usage Examples
+
+## Basic Template with Placeholders
+
+```nim
+import strformat, ../src/spectra
+
+
+# Simple template with one placeholder
+let greeting = parse("[fg=green]Hello, [0][reset]!")
+    
+echo greeting.apply("Alice")
+echo greeting.apply("Bob")
+echo greeting.apply("World")
+    
+# Complex template with multiple placeholders
+let logTemplate = parse("[0] [fg=blue][1][reset]: [fg=yellow][2][reset]")
+    
+# Different log levels
+echo logTemplate.apply("[INFO]", "main", "Application started")
+echo logTemplate.apply("[WARN]", "auth", "Token expiring soon")
+echo logTemplate.apply("[ERROR]", "db", "Connection failed")
+
+```
+
+## Basic Text Coloring
+```nim
+import spectra
+
+# Simple colored text
+parse("[fg=green]Success message![reset]").apply()
+parse("[fg=red bold]Error: Something went wrong![reset]").apply()
+parse("[fg=cyan italic]Info message[reset]").apply()
+
+# Background colors
+parse("[bg=blue fg=white]White text on blue background[reset]").apply()
+parse("[bg=lightgreen fg=black]Black text on light green[reset]").apply()
+
+```
+
+## Advanced Color Formats
+
+```nim
+import spectra
+
+# Hex colors (requires truecolor support)
+parse("[fg=#FF5733]Orange hex color[reset]").apply()
+parse("[bg=#3498db]Blue background[reset]").apply()
+
+# RGB colors
+parse("[fg=rgb(255,105,180)]Hot pink text[reset]").apply()
+parse("[bg=rgb(50,205,50)]Lime green background[reset]").apply()
+
+# 256-color palette
+parse("[fg=214]Orange from 256-color palette[reset]").apply()
+parse("[bg=196]Red background from palette[reset]").apply()
+
+```
+
+## Text Styles
+
+```nim
+import spectra
+
+# Combine styles
+parse("[bold underline=single] Bold and underlined[reset]").apply()
+parse("[italic dim]", "Dim italic text. [italic=reset dim=reset][strike]Strikethrough  text only[reset]").apply()
+parse("[blink=slow hidden]Slow blinking hidden text[reset]").apply()
+
+# Reset specific attributes
+parse("[bold fg=blue]Blue bold text. [bold=reset]No longer bold, but still blue. [fg=reset]No color, but other styles remain[reset]").apply()
+
+```
+
+## Color Toggling
+
+```nim
+import os, spectra
+
+
+# Create color toggle - respects NO_COLOR env var and when output is redirected by default
+let toggle = color.newColorToggle()
+    
+# Parse templates using the toggle
+let successTemplate = toggle.parse("[fg=green]✓ [0][reset]")
+let errorTemplate = toggle.parse("[fg=red]✗ [0][reset]")
+    
+# These will only show colors if appropriate
+echo successTemplate.apply("Operation completed")
+echo errorTemplate.apply("Operation failed")
+    
+# Manual control
+let forceColors = color.newColorToggle(true)   # Always show colors
+let noColors = color.newColorToggle(false)     # Never show colors
+    
+# Use in CLI applications
+let useColor = getEnv("NO_COLOR") == ""
+let appToggle = color.newColorToggle(useColor)
+    
+let helpTemplate = appToggle.parse("[bold fg=cyan][0][reset] [fg=green][1][reset]")
+echo helpTemplate.apply("Usage:", "myapp [options]")
+
+```
+
+## Advanced Template Examples
+
+```nim
+import os, strformat, spectra
+
+# Status indicator with conditional colors
+let statusTemplate = parse("[0] : [1][reset]")
+
+type Item* = object
+  name*: string
+  status*: string
+   
+var 
+  items: seq[Item]
+  statusColor: string
+
+items.add(Item(name: "Database", status: "Online"))
+items.add(Item(name: "API Server", status: "Offline"))
+items.add(Item(name: "Cache", status: "Degraded"))
+
+for item in items:
+  case item.status:
+  of "Online":
+    statusColor = "[fg=green bold]"
+  of "Offline":
+    statusColor = "[fg=red bold]"
+  else:
+    statusColor = "[fg=yellow]"
+    
+  let statusColored = parse(statusColor & item.status).apply()
+  echo statusTemplate.apply(item.name, statusColored)
+    
+# Progress bar template
+let progressTemplate = parse("[fg=cyan][0][reset]/[fg=cyan][1][reset] [fg=green][2][reset]%")
+    
+let total = 100
+for i in 0..total:
+  let percent = i * 100 / total
+  stdout.write("\r" & progressTemplate.apply($i, $total, $percent))
+  stdout.flushFile()
+  sleep(100)
+echo "\n"
+
+```
+
+## Building Complex UIs
+
+```nim
+import strutils, spectra
+    
+# Table with colored headers
+let headerTemplate = parse("[bold fg=cyan][0][reset]")
+let rowTemplate = parse("[0]  [fg=yellow][1][reset]  [fg=green][2][reset]")
+    
+echo headerTemplate.apply("─".repeat(40))
+echo headerTemplate.apply("USER MANAGEMENT")
+echo headerTemplate.apply("─".repeat(40))
+    
+echo rowTemplate.apply("Alice", "admin", "active")
+echo rowTemplate.apply("Bob", "user", "active")
+echo rowTemplate.apply("Charlie", "guest", "inactive")
+    
+# Nested templates
+let errorTemplate = parse("[bold fg=red][0][reset]: [1]")
+let suggestionTemplate = parse("[fg=yellow]Suggestion: [0][reset]")
  
-**Spectra has true color support**, depending on your terminal's true color support. This is achieved through its hex and RGB colors.
+ 
+type Err = object
+  code: string
+  msg: string
+  suggestion: string
+  
 
-When true-color is not available, **hex and RGB colors will not be rendered**
+var errors: seq[Err]
+errors.add(Err(code: "E001", msg: "File not found", suggestion: "Check the file path"))
+errors.add(Err(code: "E002", msg: "Permission denied", suggestion: "Run with sudo or check permissions"))
+errors.add(Err(code: "E003", msg: "Out of memory", suggestion: "Close other applications"))
 
-# Limitation
-Spectra supports Unix-like systems including Linux and macOS. Windows is not supported due to different terminal architecture.
+for err in errors:
+  echo errorTemplate.apply(err.code, err.msg)
+  echo "  " & suggestionTemplate.apply(err.suggestion)
+  echo "\n" 
 
-
-# Usage
-**Spectra supports more than one color tags in its square brackets bounded syntax (but one bad nut spoils all).** 
-
-It means spectra accepts this 
-``` nim
-echo parse("[fg=white][bold italic strike fg=cyan]Hello World[reset]").apply()
-#This will work perfectly 
 ```
-**but a typo goes unforgiven**
+
+## Project Structure Example
+
 ```nim
-echo parse("[fg=white][bld italic strike fg=cyan]Hello World[reset]").apply()
+# file: styles.nim - Define your color scheme
 
-#"bld" is the bad nut, so all other tags enclosed in same [] are treated as literals.
-#hence it prints "[bld italic strike fg=cyan]Hello World" colored white due to the first color (fg=white). 
-
-#Because the tool sees it as an escape, not a typo
-```
-
-# Importing the package
-``` nim
-import spectra
-```
-
-# Precompilation or Precomputation:
-Spectra is **color template-first**. 
-
-Reasons template-first coloring is preferred:
-- DRY Principle (Define once, use anywhere)
-- Pay parsing overhead cost once by precompiling (Performance boost)
-
-
-Worried about **manual interpolation or string concatenation**??
-Just use **indices (square bracket bounded numbers)**. See the example below.
-``` nim
-let test = parse("[bold fg=red]Hello [0][fg=cyan blink][1][reset]")
-                                      ^                 ^             
-                                      |                 |
-                                      Indices/Placeholders 0 and 1 are slots awaiting dynamic input from apply()  
-
-
-for i in 0..1000000:
-  echo test.apply("world", $i)
-
-#[0] and [1] are positional indices(index), which are used by "apply()" for interpolation.
-#Based on the parameters of apply(), [0]  ==> "world" and [1] ==> i
-```
-
-
-
-## Usage Examples
-```nim
-import spectra
-
-#Multiple styles in one tag
-echo parse("[bold italic fg=red]Important![reset]").apply()
-
-
-#Granular reset control
-echo parse("[bold fg=red bg=blue]Alert[bold=reset] Still colored[fg=reset bg=reset] Normal").apply()
-
-
-#Hex colors
-echo parse("[fg=#FF0000]Red text[fg=#00FF00]Green text[reset]").apply()
-
-#RGB colors
-echo parse("[fg=rgb(255,0,0)]Red text[fg=rgb(0,255,0)]Green text[reset]").apply()
-
-
-#256 colors
-echo parse("[fg=202]Orange text[fg=45]Blue text[reset]").apply()
-
-#Spectra for other languages through interpolation. Express Precompilation flexibility
-let lang_temp = parse("[fg=red][0]: [fg=green][1][reset]")
-
-echo lang_temp.apply("Error", "File not found") #English
-echo lang_temp.apply("Erreur", "Fichier non trouve") #French
-
-
-#Define once, use anywhere
-let help_temp = parse("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
-
-echo help_temp.apply("-h", "--help", "Show help and exit")
-echo help_temp.apply("-v", "--version", "Show version")
-echo help_temp.apply("-r", "--recursive", "Run recursively")
-
-```
-
-
-# Coloring a text
-``` nim
-echo parse("[bold][fg=yellow]Hello Word[reset]").apply() 
-
-echo parse("[bold fg=red]Error:[bold=reset] File not found[reset]").apply()
-
-#hex color
-echo parse("[fg=#FF0000 underline]DANGER[fg=reset underline=reset]").apply()
-
-# 256 color support
-let btnTemplate  = parse("[fg=255 bg=24][0][reset]")
-
-echo btnTemplate.apply("┌────────────────────┐")
-echo btnTemplate.apply("│       Submit       │")
-echo btnTemplate.apply("└────────────────────┘")
-
-```
-
-# Escapes
-``` nim
-#Normally no escapes are required if contents in "[ ]" are not colors or styles
-#For escape when contents are colors or styles, use apply()
-
-#EXAMPLE
-echo parse("[fg=green bold]Hey Fred, be [0] and [1] hard[reset]").apply("[bold]", "[strike]") #Safe for escapes too
-```
-
-# Color Toggling
-``` nim
-
-#default color toggling
-# automatically switches off color when output is redirected or when terminal has NO_COLOR on
-newColorToggle()
-
-
-newColorToggle(true) #Color always stays on
-newColorToggle(false) #Color always off
-
-
-#EXAMPLES
-let toggle = newColorToggle()
-
-let help_temp = toggle.parse("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2][reset]")
-
-echo help_temp.apply("-h", "--help", "Show help and exit")
-echo help_temp.apply("-v", "--version", "Show version")
-echo help_temp.apply("-r", "--recursive", "Run recursively")
-
-#OR
-## IMPLICIT newColorToggle() CALL
-##================================
-#still works without explicitly calling colorToggle
-#newColorToggle() is implicitly called by "parse()" 
-#when used implicitly, each "parse()" call creates a newColorToggle()
-let help_temp = parse("[bold fg=cyan][0][fg=green], [fg=cyan][1][bold=reset fg=green]: [fg=yellow][2]")
-let test_temp = parse("[bold fg=green]Test Me[reset]")
-
-#both test_temp and help_temp create newColorToggle() implicitly but they do not share. Each call creates its own
-
-echo help_temp.apply("-h", "--help", "Show help and exit")
-echo help_temp.apply("-v", "--version", "Show version")
-echo help_temp.apply("-r", "--recursive", "Run recursively")
-
-
-
-
-#respect for no-color flag
-let no_color = newColorToggle(not paramStr(1) == "--no-color")
-echo parse(no_color, "[fg=green]Ready[reset]").apply()
-```
-
-
-# Spectra In Action
-``` nim
-#EXAMPLE ONE
-let itemTemp = parse("[0], [fg=cyan][1][reset]")
-
-let fruits = @["Apple", "Watermelon", "Grapes", "Banana"]
-for i, fruit in fruits:
-  echo itemTemp.apply($(i+1), fruit)
-
-
-#EXAMPLE TWO
-let temp_template = parse("Temperature: [0]")
-
-proc showTemp(temp: int) =
-  let color = if temp > 25: "[fg=red]" elif temp < 10: "[fg=blue]" else: "[fg=green]"
-  let comp = parse(color & "[0]°C[reset]")
-  echo temp_template.apply(comp.apply($temp))
-
-showTemp(25)
-showTemp(14)
-showTemp(4)
-
-#EXAMPLE THREE
-let loginTemp = parse("""
-Username: [fg=cyan][0][reset]
-Password: [fg=yellow][1][reset]
-""")
-
-echo loginTemp.apply("Jay Pal", "********")
-```
-## For Projects
-### Style File (Define spectra colors upfront)
-```nim
- # styles.nim
- import spectra, terminal
+import spectra, terminal
 
 let toggle = newColorToggle(not noColor and stdout.isatty())
 
@@ -226,11 +275,14 @@ let help* = (
 )
 ```
 
-### Help File (Applying defined colors)
+
+
 ```nim
-# help.nim
-import strutils, strformat
 include styles
+
+# file: help.nim - Use the color templates
+
+import strutils, strformat
 
 
 proc helpFunc*() =
@@ -244,70 +296,172 @@ proc helpFunc*() =
   echo help.flag.apply("-v", "--version", "output version information and exit")
   echo help.flag.apply("", "--verbose", "explain what is being done")
   echo help.flag.apply("-l", "--link", "hard link files instead of copying")
+
 ```
 
 
+```nim
+import help
 
-## Beauty Of Spectra
-``` nim
-#This example is to express how spectra can be used for ascii arts
-
-# Create gradient-like effects with multiple colors
-#to recreate the unicode block below
-#for linux, enter "Ctrl + Shift + u" and then type "2592" and press enter
-echo parse("""
-[fg=#FF0000][0][fg=#FF3300][0][fg=#FF6600][0][fg=#FF9900][0][fg=#FFCC00][0][reset]
-[fg=#CC0000][0][fg=#CC3300][0][fg=#CC6600][0][fg=#CC9900][0][fg=#CCCC00][0][reset]
-[fg=#990000][0][fg=#993300][0][fg=#996600][0][fg=#999900][0][fg=#99CC00][0][reset]
-""").apply("▓".repeat(3))
-
-
-
-# Simple colored blocks and patterns
-#to recreate the unicode block below
-#for linux, enter "Ctrl + Shift + u" and then type "2588" and press enter
-
-let blkTemp = parse("[fg=red][0][fg=green][0][fg=blue][0][reset]")
-let lastTemp = parse("[fg=yellow][0][fg=magenta][0][fg=cyan][0][reset]\n")
-
-echo blkTemp.apply("█".repeat(8))
-echo blkTemp.apply("█".repeat(8))
-echo lastTemp.apply("█".repeat(8))
-
-
-
-echo parse("""
-[fg=red][0][fg=#FF6600][0][fg=yellow][0][fg=green][0][fg=blue][0][fg=#6600FF][0][fg=magenta][0][reset]
-""").apply("▄".repeat(5))
-
-
-#ctrl+ shift+u + 250c = ┌
-#ctrl+ shift+u + 2514 = └
-#ctrl+ shift+u + 2518 = ┘
-#ctrl+ shift+u + 2510 = ┐
-#ctrl+ shift+u + 2500 = ─
-#ctrl+ shift+u + 2502 = │
-
-let btnTemplate = parse("[fg=255 bg=24][0][1][2][reset]")
-
-echo btnTemplate.apply("┌", "─".repeat(12), "┐")
-echo btnTemplate.apply("│", "   Submit   ", "│")
-echo btnTemplate.apply("└", "─".repeat(12), "┘")
+# file: main.nim - Main application
+echo helpFunc()
 ```
 
-## Results
-![beauty](/example_result/beauty.png)
 
+## CLI Applications
 
-# Spectra Syntax Reference On Terminal
-``` nim
-import spectra
-#view color syntax and corresponding output
-listColors()
+```go
+import os, spectra
 
-#view style syntax and corresponding output
-listStyles()
+# Best practice for CLI applications
+
+# Check for --no-color flag
+
+let noColorFlag: bool = false
+
+for arg in commandLineParams():
+  if arg == "--no-color":
+    noColorFlag = true
+    break
+    
+# Respect both flag and environment variable
+let useColor = !noColorFlag and getEnv("NO_COLOR") == ""
+    
+# Create toggle
+let toggle = color.newColorToggle(useColor)
+    
+# All templates use this toggle
+    templates := struct {
+        Success color.CompiledTemplate
+        Error   color.CompiledTemplate
+        Header  color.CompiledTemplate
+    }{
+        Success: toggle.parse("[fg=green]✓ [0][reset]"),
+        Error:   toggle.parse("[fg=red]✗ [0][reset]"),
+        Header:  toggle.parse("[bold][0][reset]"),
+    }
+    
+# Use templates - they'll respect the toggle
+echo templates.header.apply("My Application"))
+echo templates.success.apply("Started successfully"))
+    
+# If --no-color was used or NO_COLOR is set,
+# outputs will be plain text without escape codes
+}
 ```
+
+## Error Handling in Templates
+
+```nim
+import ../src/spectra, tables
+
+# Template for showing validation errors
+let validationTemplate = parse("[fg=red]• [0]: [1][reset]")
+    
+let errors = {
+  "username": "Must be at least 3 characters",
+  "email":    "Invalid email format",
+  "password": "Must contain uppercase and numbers"
+}.toTable
+    
+echo parse("[bold fg=yellow]Validation Errors:[reset]").apply()
+for field, message in errors:
+  echo validationTemplate.apply(field, message)
+
+
+# Template with conditional formatting
+let scoreTemplate = parse("[0]: [1]")
+ 
+type Score = object
+  name: string
+  score: int
+ 
+var scores: seq[Score]
+
+scores.add(Score(name: "Alice", score: 95))
+scores.add(Score(name: "Bob", score: 75))
+scores.add(Score(name: "Charlie", score: 45))
+scores.add(Score(name: "Diana", score: 60))
+
+   
+for s in scores:
+  var scoreColor: string
+  if s.score >= 90:
+    scoreColor = "[fg=green bold]"
+  elif s.score >= 70:
+    scoreColor = "[fg=yellow]"
+  else:
+    scoreColor = "[fg=red]"
+  let coloredScore = parse(scoreColor & $s.score & "[reset]").apply()
+  echo scoreTemplate.apply(s.name, coloredScore)
+
+```
+
+## Pattern to avoid
+```nim
+# Good pattern
+
+proc init() =
+  let toggle = color.newColorToggle()
+  let success = toggle.parse("[fg=green] [0][reset]")
+  let error = toggle.parse("[fg=red] [0][reset]")
+
+
+# Bad pattern (parsing in hot loop)
+
+def processItems(items: seq[string]) =
+  for item in items:
+    # DON'T DO THIS - parses every iteration!
+    let tmpl = parse("[fg=blue]" & item & "[reset]")
+    echo tmpl.apply())
+
+```
+
+## Performance Comparison
+
+```nim
+import times, strformat, spectra
+
+
+
+const iterations = 1000000
+    
+# Method 1: parse once, apply many
+let temp = parse("[bold fg=red][0][reset] [fg=green][1][reset]")
+    
+var start = cpuTime()
+for i in 0..iterations:
+  temp.apply(fmt "Item{i}", "Value{i}")
+
+echo fmt "Template reuse: {cpuTime() - start}"
+
+    
+# Method 2: parse every time
+start = cpuTime()
+for i in 0..iterations:
+  parse(fmt"[bold fg=red]Item{i}[reset] [fg=green]Value{i}[reset]").apply()
+
+echo fmt "Parse every time: {cpuTime() - start}"
+
+    
+# Method 3: Manual concatenation
+start = cpuTime()
+for i in 0..iterations:
+  let parseCol = parseColor("fg=red bold") & fmt"Item{i}" & parseColor("reset") & " " & parseColor("fg=green") & fmt"Value{i}" & parseColor("reset")
+
+echo fmt "Manual concatenation: {cpuTime() - start}"
+
+```
+
+## Performance Comparison Result
+
+```bash
+Template reuse: 5.38109636
+Parse every time: 48.491620272999995
+Manual concatenation: 20.403113159999997
+
+```
+
 
 # Spectra Syntax Reference
 
@@ -396,68 +550,127 @@ listStyles()
 | `bg=NNN` | 256-color palette (0-255) for background |
 
 
-# Parsing Overhead Benchmark
-I decided to test the speed of spectra parsing.
-``` nim
-import spectra, strformat, times
+
+# Tips and Best Practices
+
+1. Parse Once: Always parse templates at initialization, not in loops
+2. Use Toggles: Respect user preferences with color toggling
+3. Template Reuse: Create templates for consistent styling
+4. Placeholder Limits: The current implementation supports [0] through [999]
+5. Testing: Test both color and no-color outputs
 
 
-let iterations = 1000000
+# Limitations
 
-#for spectra with precomputation
-let comp = parse("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast   fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]")
+1. Terminal Dependency: Colors only work in terminals that support ANSI escape codes(Unix/Linux platform)
+2. TrueColor Requirement: Hex and RGB colors require terminal with truecolor support
+3. Style Support: Some styles (blink, double underline) may not work in all terminals
+4. Color Detection: Fallback from truecolor to 256-color not yet implemented
+5. Windows: May require additional setup on Windows terminals
 
-let fStartTime = cpuTime()
-for i in 0..iterations:
-  discard comp.apply($i)
-let fEndTime = cpuTime()
+# Platform Support
 
-#for spectra without precomputation (simulating naive color libraries)
-#Reparse per loop
-let sStartTime = cpuTime()
-for i in 0..iterations:
-  discard parse("[bold fg=cyan italic] Processing [fg=yellow underline][0][fg=green strike] from [dim blinkfast fg=#FFFFFF] file 1 [reverse fg=254]to end[reset]").apply($i)
-let sEndTime = cpuTime()
-
-#Checking without spectra
-let tStartTime = cpuTime()
-for i in 0..iterations:
-  discard fmt "Processing {i} from file 1  to end."
-let tEndTime = cpuTime()
-
-
-
-
-echo "First Loop Duration [Spectra]: ", fEndTime-fStartTime, "sec"
-echo "Second Loop Duration [Parse Per Loop]: ", sEndTime-sStartTime, " sec"
-echo "Third Loop Duration [Pure Nim]: ", tEndTime-tStartTime, " sec"
-
-```
-
-## Output
-``` bash
-First Loop Duration [Spectra]: 3.048232739sec
-Second Loop Duration [Parse Per Loop]: 163.822929514 sec
-Third Loop Duration [Pure Nim]: 1.254006722999975 sec
-
-```
-## Note
-**The benchmark is to show how low spectra interpolation overhead is and how effiecient it is in loops.**
-
-**By default spectra is more than 48x faster than most naive color libraries for hot loops (all thanks to precomputation)**
-
-**Test for yourself if you doubt this benchmark**
-
+- Linux/macOS terminals (full support)
+- Windows Terminal/WSL (good support probably)
+- Legacy Windows CMD (not supported)
+- iTerm2, GNOME Terminal, Kitty (not tested yet)
 
 # Contributing
 
-You can help improve Spectra by:
+We welcome contributions! Here's how you can help:
 
-- Trying to use it and giving feedback
-- Test the programs under different MacOS versions or Linux distributions
-- Help improving and extending the code
-- Adding Windows support
+1. Report Bugs: Open an issue with reproduction steps
+2. Suggest Features: Share your ideas for improvements
+3. Submit PRs:
+   - Fork the repository
+   - Create a feature branch
+   - Add tests for your changes
+   - Ensure code follows Nim conventions
+   - Submit a pull request
 
 
-# SPECTRA CREED
-We believe terminal coloring should be **predictable, fast** and **explicit**. We optimize for productiona performance over development convenience, and for runtime efficiency over typo forgiveness. Our users value speed and reliability above all else.
+# Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/ph4mished/spectra.git
+cd spectra
+
+# Run tests
+cd tests
+nim c -r test1.ni && nim c -r test2
+
+```
+
+# Areas Needing Improvement
+
+1. Better Windows compatibility
+2. 256-color fallback for truecolor
+3. Performance optimization
+4. More color spaces (HSL, HSV)
+5. Gradient support
+
+# License
+
+MIT License - see LICENSE file for details.
+
+# Acknowledgments
+
+- ANSI escape code specifications
+- The Go community for testing and feedback
+- All contributors who have helped improve this library
+
+---
+
+**Note**: Always test color output in different terminals to ensure compatibility with your users' environments. Consider providing a --no-color flag in your applications for users who prefer plain text.
+# color
+A port of spectra color library to golang
+
+This library provides a powerful, performance-optimized way to add colors to your Go CLI applications while respecting user preferences and terminal capabilities.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

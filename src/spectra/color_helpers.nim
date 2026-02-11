@@ -24,17 +24,22 @@ proc initColorizeEcho*() {.discardable.} =
     var handle = getStdHandle(-11)
     setConsoleMode(handle, MODE)]#
 
+#===========================================
+#  COLOR VALIDATION
+#===========================================
+
 proc isValidHex(hexCode: string): bool =
   #fg=#AABBCC
   try:
-    return hexCode[4..^1].len == 6 and allIt(mapIt(hexCode[4..^1], $it), it.allCharsInSet(HexDigits)) #for rrggbb
+    return hexCode[4..^1].len == 6 and allIt(mapIt(hexCode[4..^1], $it), it.allCharsInSet(HexDigits)) and (hexCode.startsWith("fg=") or hexCode.startsWith("bg=")) #for rrggbb
   except RangeDefect:
     return false
 
 
 proc isValid256Code(paletteCode: string): bool =
   try:
-    return parseInt(paletteCode[3..^1]) in 0..255
+    #if :
+      return parseInt(paletteCode[3..^1]) in 0..255 and (paletteCode.startsWith("fg=") or paletteCode.startsWith("bg="))
   except RangeDefect, ValueError:
     return false
     
@@ -42,7 +47,7 @@ proc isValid256Code(paletteCode: string): bool =
 proc isValidRGB(rgbCode: string): bool =
   try:
     #fg=rgb(255,0,0)
-    return rgbCode[3..6] == "rgb(" and rgbCode[^1] == ')' and  allIt(rgbCode[7..^2].split(","), it.allCharsInSet(Digits) and it.parseInt in 0..255)
+    return rgbCode[3..6] == "rgb(" and rgbCode[^1] == ')' and  allIt(rgbCode[7..^2].split(","), it.allCharsInSet(Digits) and it.parseInt in 0..255) and (rgbCode.startsWith("fg=") or rgbCode.startsWith("bg="))
   #allIt() iterates through every string in the sequence, for each string, 'it.' represents that string.
   #So it.allCharInSet(Digits) checks if that string contains only digits
   except RangeDefect, IndexDefect:
@@ -66,6 +71,9 @@ proc readRGB(code: string): seq[int]=
     
 
 
+#======================================
+# COLOR PARSING
+#======================================
 
 proc parseRGBToAnsiCode(rgbCode: string): string = 
   if supportsTrueColor():
@@ -110,13 +118,13 @@ proc parseColor*(color: string): string {.discardable.} =
   #this function is meant to receive string like "bold" "fg=red" and other colors and
   #convert them to their ansi codes
   if color in colorMap:
-    return color.replace(color, fmt "\e[{colorMap[color]}m")
+    return fmt "\e[{colorMap[color]}m"
 
   elif color in styleMap:
-    return color.replace(color, fmt "\e[{styleMap[color]}m")
+    return fmt "\e[{styleMap[color]}m"
 
   elif color in resetMap:
-    return color.replace(color, fmt "\e[{resetMap[color]}m")
+    return fmt "\e[{resetMap[color]}m"
 
   elif color.isValid256Code():
     return parse256ColorCode(color)

@@ -44,7 +44,6 @@ let resetMap* = {
   "reset":               "0",  #reset all styles
   "fg=reset":            "39", #resets foreground colors
   "bg=reset":           "49", #reset background colors
-   #"resetBold": "21", 2 is not mostly supported
   "bold=reset": "22",
   "dim=reset": "22",
   "italic=reset": "23",
@@ -67,7 +66,7 @@ let styleMap* = {
   "reverse": "7",
   "hidden": "8",
   "strike": "9" , #strike-through,
-  "underline=double": "4"
+  "underline=double": "21"
 }.toTable
 
 
