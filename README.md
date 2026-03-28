@@ -310,7 +310,7 @@ echo helpFunc()
 
 ## CLI Applications
 
-```go
+```nim
 import os, spectra
 
 # Best practice for CLI applications
@@ -409,7 +409,7 @@ proc init() =
 
 # Bad pattern (parsing in hot loop)
 
-def processItems(items: seq[string]) =
+proc processItems(items: seq[string]) =
   for item in items:
     # DON'T DO THIS - parses every iteration!
     let tmpl = parse("[fg=blue]" & item & "[reset]")
