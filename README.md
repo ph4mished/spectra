@@ -74,7 +74,7 @@ echo temp.apply("Network timeout")
 ## Basic Template with Placeholders
 
 ```nim
-import strformat, ../src/spectra
+import strformat, spectra
 
 
 # Simple template with one placeholder
