@@ -533,7 +533,6 @@ Manual concatenation: 20.403113159999997
 | `italic=reset` | Reset italic style only |
 | `underline=reset` | Reset underline style only |
 | `blink=reset` | Reset blink style only |
-| `blinkfast=reset` | Reset fast blink style only |
 | `reverse=reset` | Reset reverse style only |
 | `hidden=reset` | Reset hidden style only |
 | `strike=reset` | Reset strikethrough style only |
