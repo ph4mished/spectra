@@ -105,7 +105,7 @@ parse("[fg=cyan italic]Info message[reset]").apply()
 
 # Background colors
 parse("[bg=blue fg=white]White text on blue background[reset]").apply()
-parse("[bg=lightgreen fg=black]Black text on light green[reset]").apply()
+parse("[bg=lgreen fg=black]Black text on light green[reset]").apply()
 
 ```
 
@@ -478,13 +478,13 @@ Manual concatenation: 20.403113159999997
 | `fg=cyan` | Cyan text |
 | `fg=white` | White text |
 | `fg=darkgray` | Dark gray text |
-| `fg=lightred` | Light red text |
-| `fg=lightgreen` | Light green text |
-| `fg=lightyellow` | Light yellow text |
-| `fg=lightblue` | Light blue text |
-| `fg=lightmagenta` | Light magenta text |
-| `fg=lightcyan` | Light cyan text |
-| `fg=lightwhite` | Light white text |
+| `fg=lred` | Light red text |
+| `fg=lgreen` | Light green text |
+| `fg=lyellow` | Light yellow text |
+| `fg=lblue` | Light blue text |
+| `fg=lmagenta` | Light magenta text |
+| `fg=lcyan` | Light cyan text |
+| `fg=lwhite` | Light white text |
 
 
 **Background Colors**
@@ -499,13 +499,13 @@ Manual concatenation: 20.403113159999997
 | `bg=cyan` | Cyan background |
 | `bg=white` | White background |
 | `bg=darkgray` | Dark gray background |
-| `bg=lightred` | Light red background |
-| `bg=lightgreen` | Light green background |
-| `bg=lightyellow` | Light yellow background |
-| `bg=lightblue` | Light blue background |
-| `bg=lightmagenta` | Light magenta background |
-| `bg=lightcyan` | Light cyan background |
-| `bg=lightwhite` | Light white background |
+| `bg=lred` | Light red background |
+| `bg=lgreen` | Light green background |
+| `bg=lyellow` | Light yellow background |
+| `bg=lblue` | Light blue background |
+| `bg=lmagenta` | Light magenta background |
+| `bg=lcyan` | Light cyan background |
+| `bg=lwhite` | Light white background |
 
 
 ## Text Styles
