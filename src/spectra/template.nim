@@ -1,4 +1,4 @@
-import strutils, os, terminal, math, sequtils, unicode
+import strutils, os, terminal, math, sequtils, unicode, strformat
 import color_helpers
 
 type 

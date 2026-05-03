@@ -5,7 +5,10 @@ type
   TempPart* = object
     text*: string
     index*: int #all place holders will be converted to ints
-    formatStr*: string
+    align*: char
+    width*: int
+    fillChar*: char
+    #formatStr*: string
 
   CompiledTemplate* = object
     parts*: seq[TempPart]
@@ -24,7 +27,7 @@ proc parseAlignWidth(input: string): (char, int, bool) =
   if input.len < 2:
     return (char(0), 0, false)
   let align = input[0]
-  if align notin ['<', '>']:
+  if align notin ['<', '>', '^']:
     return ('\0', 0, false)
   
   let widthStr = input[1..^1]
@@ -41,23 +44,23 @@ proc parseAlignWidth(input: string): (char, int, bool) =
 
 
 
-proc buildFormatStr(align: char, width: int): string = 
+proc applyPadding(value: string, align: char, width: int, fillChar: char): string = 
   case align
   of '<':
-    return fmt "%-{width}s"
+    return value.alignLeft(width, fillChar)
   of '>':
-    return fmt "%{width}s"
+    return value.align(width, fillChar)
   of '^':
-    return fmt "%^{width}s"
+    return value.center(width, fillChar)
   else:
-    return ""
+    return value
 
 
 
 proc flushText(parts: seq[TempPart], currentText: string): seq[TempPart] =
   result = parts
   if currentText.len > 0:
-    result.add(TempPart(text: currentText, index: -1, formatStr: ""))
+    result.add(TempPart(text: currentText, index: -1, align: '\0', width: 0, fillChar: '\0'))
  
 
 
@@ -80,11 +83,6 @@ proc flushText(parts: seq[TempPart], currentText: string): seq[TempPart] =
 #So crayon opted for {Define once, pad many times}
 # pad := crayon.Parse("[fg=red]Error: [0:<20][reset]")
 #  pad.Println("File Not Found") which correctly left aligns only "File Not Found"
-
-#crayon's padding is nothing special, it just does this
-#padIt := fmt.Sprintf("%-20s", "File Not Found") in the backend
-# pad.Println(padIt)
-#Saving you less typing strokes and efficient for repeated outputs
 #========= END =========
 
 
@@ -99,28 +97,34 @@ proc handlePlaceholder(parts: seq[TempPart], contentSequence: string): seq[TempP
   #digit boundary guard to prevent overflow
   let index = contentSequence.parseInt()
   if index in 0..999:
-    return @[TempPart(text: "", index: index, formatStr: "")]
+    return @[TempPart(text: "", index: index, align: '\0', width: 0)]
   #out of range - treat as literal
-  return @[TempPart(text: fmt "[{contentSequence}]", index: -1, formatStr: "")]
+  return @[TempPart(text: fmt "[{contentSequence}]", index: -1, align: '\0', width: 0, fillChar: '\0')]
   
 
 
 proc handlePaddedPlaceholder(parts: seq[TempPart], contentSequence: string): seq[TempPart] =
   # [0:>20] stripped of its brackets ==> 0:>20
   let splitWord = contentSequence.split(":", 2) # ==> [0 > 20
-  if splitWord.len != 2:
-    return @[TempPart(text: fmt "[{contentSequence}]", index: -1, formatStr: "")]
+  if splitWord.len < 2:
+    return @[TempPart(text: fmt "[{contentSequence}]", index: -1, align: '\0', width: 0, fillChar: '\0')]
   
   let indexStr = splitWord[0]
   let padStr = splitWord[1]
+  var fillChar: char
+  if splitWord.len() == 3:
+    fillChar = splitWord[2][0]
+  else:
+    fillChar = ' '
+
   let index = indexStr.parseInt()
   if not indexStr.isValidPlaceholder():
-    return @[TempPart(text: fmt "[{contentSequence}]", index: -1, formatStr: "")]
+    return @[TempPart(text: fmt "[{contentSequence}]", index: -1, align: '\0', width: 0, fillChar: '\0')]
   #parse the padStr
   let (align, width, boolean) = parseAlignWidth(padStr)
   if not boolean:
-    return @[TempPart(text: fmt "[{contentSequence}]", index: -1, formatStr: "")]
-  return @[TempPart(text: "", index: index, formatStr: buildFormatStr(align, width))]
+    return @[TempPart(text: fmt "[{contentSequence}]", index: -1, align: '\0', width: 0, fillChar: '\0')]
+  return @[TempPart(text: "", index: index, align: align, width: width, fillChar: fillChar)]
 
 
 
@@ -144,9 +148,9 @@ proc handleColorSequence(parts: seq[TempPart], allWords: seq[string], enableColo
   result = parts
   if enableColor:
     for word in allWords:
-      result.add(TempPart(text: parseColor(word), index: -1, formatStr: ""))
+      result.add(TempPart(text: parseColor(word), index: -1, align: '\0', width: 0, fillChar: '\0'))
   else:
-    result.add(TempPart(text: "", index: -1, formatStr: ""))
+    result.add(TempPart(text: "", index: -1, align: '\0', width: 0, fillChar: '\0'))
 
 
 
@@ -159,7 +163,7 @@ proc handleNonColorSequence(parts: seq[TempPart], contentSequence: string): seq[
   if contentSequence.contains(":"):
    return parts.handlePaddedPlaceholder(contentSequence)
   #Unrecognized: pass through as literal
-  result.add(TempPart(text: fmt "[{contentSequence}]", index: -1, formatStr: ""))
+  result.add(TempPart(text: fmt "[{contentSequence}]", index: -1, align: '\0', width: 0, fillChar: '\0'))
 
 
 
@@ -227,7 +231,7 @@ proc parseLoop(input: string, enableColor: bool): (seq[TempPart], string) =
   if inReadSequence and contentSequence.len > 0:
     #Treat unclosed bracket as literal
     parts = flushText(parts, currentText)
-    parts.add(TempPart(text: fmt "[{contentSequence}]", index: -1, formatStr: ""))
+    parts.add(TempPart(text: fmt "[{contentSequence}]", index: -1, align: '\0', width: 0, fillChar: '\0'))
     currentText = ""
   return (parts, currentText)
 
@@ -249,8 +253,8 @@ proc apply*(temp: CompiledTemplate, args: varargs[string, `$`]): string {.discar
       result.add(part.text)
     elif part.index < args.len:
       var value = args[part.index]
-      if part.formatStr != "":
-        value = part.formatStr % value
+      if part.width > 0:
+        value = applyPadding(value, part.align, part.width, part.fillChar) #part.formatStr % value
       result.add(value)
 
 
